@@ -3420,6 +3420,35 @@ function Reveal({ delay = 0, children }) {
 
 ---
 
+### Extra: Dark mode gradient background ✅
+
+The flat `slate-950` dark background became a gradient. I compared 5 options locally (with a temporary button bar) and kept my own two colors.
+
+`src/app/globals.css`:
+
+```css
+.dark body {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(34 211 238 / 0.12), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgb(139 92 246 / 0.12), transparent 45%),
+    linear-gradient(160deg, oklch(14.1% 0.005 285.823) 0%, oklch(12.9% 0.042 264.695) 100%);
+  background-attachment: fixed;
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `.dark body` | Only in dark mode (next-themes puts `class="dark"` on `<html>`). Light mode stays white |
+| `linear-gradient(160deg, A, B)` | Fades from color A (top-left) to color B (bottom-right) |
+| `oklch(14.1% 0.005 285.823)` | Tailwind's `zinc-950`: Lightness, Chroma (colorfulness), Hue (color angle) |
+| `oklch(12.9% 0.042 264.695)` | Tailwind's `slate-950`: a dark blue-gray |
+| `radial-gradient(circle at 15% 10%, ...)` | A soft round glow: cyan at the top-left, violet at the bottom-right |
+| `rgb(34 211 238 / 0.12)` | Cyan at 12% opacity, so the glow is subtle |
+| Several backgrounds separated by commas | They stack: the first one is on top |
+| `background-attachment: fixed` | The gradient stays still while the page scrolls |
+
+---
+
 ## What I learned
 
 | Date | Concept | In my own words |
