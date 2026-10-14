@@ -52,11 +52,16 @@ The path says `OneDrive`, but **I removed OneDrive** (14 Oct), so nothing syncs 
 
 ---
 
-## 4. Phase 1: Build the portfolio (7 days, 15 to 21 Oct)
+## 4. Phase 1: Build the portfolio (as fast as possible, step by step)
 
-Each day: learn the idea → write the code → run it → Claude reviews → `git commit` + `git push`.
+**Changed 15 Oct:** I don't count days anymore. I go **step by step, as fast as I can**.
+The exact list of 23 steps is the **Roadmap** at the top of `STEPS.md`.
 
-| Day | Build | What I learn | Done when |
+Each step: learn the idea → write the code → run it → Claude reviews → `git commit` + `git push`.
+
+The table below shows the same work in groups, with what I learn in each one:
+
+| Group | Build | What I learn | Done when |
 |---|---|---|---|
 | 1 | `create-next-app`, install packages, clean the starter, **push to GitHub, deploy to Vercel** | Project setup, git basics, deploy | A (blank) live `.vercel.app` link works |
 | 2 | Folders, `portfolio.js`, `layout.js` (font + SEO), `page.js` | Imports/exports, metadata, `next/font` | Page shows all section names in order |
@@ -66,7 +71,7 @@ Each day: learn the idea → write the code → run it → Claude reviews → `g
 | 6 | Polish: phone testing, hover effects, Lighthouse | Responsive design, performance | Lighthouse ≥ 90 on desktop |
 | 7 | OG image, favicon, README, share the link on GitHub and LinkedIn | SEO basics | Link preview looks good on LinkedIn |
 
-**Stop on day 7, even if it is not perfect.** I can polish later.
+**Finish fast, even if it is not perfect.** I can polish later. Projects matter more.
 
 ---
 

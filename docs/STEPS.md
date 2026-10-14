@@ -8,9 +8,38 @@
 
 **Status key:** ✅ Done · 🔄 Doing now · ⬜ To do · ❌ Problem
 
+**How I work:** one step at a time, as fast as I can, no fixed days. I finish a step → tell Claude → Claude checks it and writes the next step here.
+
 ---
 
-## Day 1: Setup and first deploy
+## Roadmap: all steps
+
+| Part | # | Step | Status |
+|---|---|---|---|
+| **1. Setup and deploy** | 1–6 | Terminal, create app, run, packages, clean starter | ✅ |
+| | 7 | Push to GitHub | ✅ |
+| | 8 | Deploy to Vercel (site goes live) | ⬜ |
+| **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | ⬜ |
+| | 10 | `layout.js`: font, page title/SEO, dark colors | ⬜ |
+| | 11 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ⬜ |
+| **3. Sections** | 12 | Navbar (sticky + mobile menu) | ⬜ |
+| | 13 | Hero (name, title, buttons, socials) | ⬜ |
+| | 14 | 3D scene in Hero (Spline) | ⬜ |
+| | 15 | About (photo + bio) | ⬜ |
+| | 16 | Skills (cards with icons) | ⬜ |
+| | 17 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
+| | 18 | Contact form (Web3Forms) | ⬜ |
+| | 19 | Footer | ⬜ |
+| **4. Polish and launch** | 20 | Mobile check + reduced motion | ⬜ |
+| | 21 | SEO: favicon, social preview image | ⬜ |
+| | 22 | README for recruiters | ⬜ |
+| | 23 | Lighthouse + final checks → share my link | ⬜ |
+
+**Things I need to prepare (Claude tells me when):** LinkedIn URL (Step 9) · Spline account + scene (Step 14) · profile photo (Step 15) · Web3Forms key (Step 18)
+
+---
+
+## Part 1: Setup and first deploy
 
 ### Step 1: Open the terminal in my project folder ✅
 
@@ -246,7 +275,11 @@ git commit -m "Clean starter files and install packages"
 
 **Check:** `git log --oneline` shows 2 commits.
 
-### Step 7: Push to GitHub ⬜
+### Step 7: Push to GitHub ✅
+
+> ✅ **15 Oct:** pushed to https://github.com/sajidur70/portfolio. Branch renamed `master` → `main`. 3 commits on GitHub.
+> ✅ 7.1 done later: git name is now `Sajidur Rahman`. Old commits keep `sajidur319370`, new commits use my real name.
+> GitHub username stays `sajidur70`. Git name and GitHub username don't need to match. The **email** links commits to my account.
 
 **My GitHub:** https://github.com/sajidur70
 **Repo name:** `portfolio` → https://github.com/sajidur70/portfolio
@@ -297,7 +330,65 @@ git push -u origin main
 **Check:** refresh https://github.com/sajidur70/portfolio. I see `src/`, `docs/`, `package.json`...
 `node_modules/` and `.next/` are **not** there (because of `.gitignore`). ✅ Correct!
 
-### Step 8: Deploy to Vercel ⬜
+---
+
+### Step 8: Deploy to Vercel 🔄
+
+> ✅ **15 Oct:** 8.1 + 8.2 done. "Congratulations! You just deployed a new project to sajidur70's projects." GitHub shows a **Production** deployment with status **success**.
+> ⚠️ Long URLs like `portfolio-mhmof13p3-sajidur70s-projects.vercel.app` are **protected**: only I can open them (logged in to Vercel). Other people see a Vercel login page.
+> The **public** link is the one under **Domains** on the project page. Share only that one. Test it in an **Incognito window** (`Ctrl + Shift + N`).
+> ✅ **8.3 done:** added the domain **https://sajidur-rahman.vercel.app** (Settings → Domains → **Add Domain**) and removed the old one. Claude checked it: public, status 200, shows my name.
+> Note: the warning about "OpenID Connect Token claims" appears when renaming the **project** (Settings → General). Renaming the project does NOT change the URL, and I don't use OIDC, so the warning is safe to ignore.
+
+**Why:** Vercel turns my GitHub repo into a live website for free. After this, **every `git push` updates the live site automatically** in about 1 minute.
+
+#### 8.1 Sign up
+
+1. Go to https://vercel.com/signup
+2. Plan: **Hobby** (free, for personal projects)
+3. Choose **Continue with GitHub** → sign in → **Authorize Vercel**
+
+#### 8.2 Import my repo
+
+1. Vercel dashboard → **Add New…** → **Project**
+2. Under **Import Git Repository**, find `portfolio` → click **Import**
+   - Don't see it? Click **Adjust GitHub App Permissions** → give access to the `portfolio` repo → come back.
+3. Check the settings (don't change anything):
+   - **Framework Preset:** Next.js (detected automatically)
+   - **Root Directory:** `./`
+   - **Build Command:** `next build` (the same `npm run build` I tested in Step 6)
+4. Click **Deploy** and wait about 1 minute.
+5. 🎉 "Congratulations!" → click the preview to open my live site.
+
+#### 8.3 Give it a nice URL
+
+Vercel gives a random-looking URL like `portfolio-abc123.vercel.app`. Make it professional:
+
+1. Project → **Settings** → **Domains**
+2. Click **Edit** on the `.vercel.app` domain → type e.g. `sajidur-rahman.vercel.app` (it must be free) → **Save**
+
+#### 8.4 Test auto-deploy
+
+1. In `src/app/page.js`, change `Portfolio coming soon` to `Portfolio coming soon 🚀`
+2. Push it:
+
+```powershell
+git add .
+git commit -m "Test auto deploy"
+git push
+```
+
+3. Vercel → **Deployments** shows a new "Building" item. After about 1 minute, refresh my live site → I see 🚀.
+
+| Word | Meaning |
+|---|---|
+| **Deployment** | One version of my site that Vercel built from one commit |
+| **Production** | The live version (built from `main`) |
+| **Preview** | A test version Vercel builds from other branches. It doesn't change my live site |
+| **Build logs** | What Vercel printed while building. Read them if a deploy fails |
+
+**Check:** my live URL opens on my phone too.
+**My live URL:** https://sajidur-rahman.vercel.app ✅
 
 ---
 

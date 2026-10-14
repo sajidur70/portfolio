@@ -8,8 +8,8 @@
 | **Owner** | Sajidur Rahman |
 | **Role** | Junior MERN Stack Developer |
 | **Started** | October 2026 |
-| **Live site** | `https://<your-name>.vercel.app` ← *update after first deploy* |
-| **GitHub repo** | `https://github.com/<your-username>/portfolio` ← *update after first push* |
+| **Live site** | https://sajidur-rahman.vercel.app |
+| **GitHub repo** | https://github.com/sajidur70/portfolio |
 | **Status** | 🚧 In progress: portfolio first, then 3 MERN projects, then resume |
 
 ---
