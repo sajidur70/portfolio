@@ -3520,6 +3520,39 @@ Under my photo: **"Tap to try an effect"** with buttons **None · Glow · Bounce
 | `@media (prefers-reduced-motion: no-preference)` | Only animate if the visitor didn't ask their device for less motion |
 | `motion-reduce:hidden` | ...and hide the buttons for those visitors |
 
+### Extra: "Draw" effect with anime.js ✅
+
+A 4th effect button: **Draw**. Using [anime.js `createDrawable`](https://animejs.com/documentation/svg/createdrawable):
+1. The outline of each letter of my name is drawn, one after another, and a white line goes around my photo at the same time
+2. My name fills in (it looks the same as the normal heading)
+3. It holds for 1.5s, then erases, and repeats
+
+**Problem:** anime.js can only "draw" SVG shapes (`<path>`, `<line>`, `<rect>`), not normal text.
+**Fix:** I turned each letter of my name into an SVG `<path>`, generated once from the Geist Bold font file (same font as my heading) with a small script using `opentype.js`.
+
+| File | What changed |
+|---|---|
+| `src/components/DrawnName.jsx` (new) | My name as 13 SVG letter paths (~5 KB). Hidden unless Draw is on |
+| `src/components/EffectPicker.jsx` | The Draw button + the anime.js timeline |
+| `src/components/Hero.jsx` | `<DrawnName />` in the `<h1>`, and an SVG circle around the photo |
+| `src/app/globals.css` | Show the SVGs (and hide the normal letters) only when `data-fx="draw"` |
+| `package.json` | New package: `animejs` |
+
+| Code | Meaning |
+|---|---|
+| `await import("animejs")` | **Dynamic import**: anime.js is only downloaded when someone taps Draw, so the page stays fast for everyone else |
+| `svg.createDrawable(paths)` | Gives each path a `draw` property: `"0 0"` = nothing visible, `"0 1"` = the whole line, `"1 1"` = erased from the start |
+| `createTimeline({ loop: true })` | Several animations one after another, repeating |
+| `.add(targets, params, 0)` | Position `0`: start at the very beginning (together with the first one) |
+| `.add(..., "+=1500")` | Start 1.5s after the previous one ends (the "hold") |
+| `.add(..., "<")` | Start at the same time as the previous one |
+| `stagger(90)` | Each letter starts 90ms after the one before |
+| `drawTimeline.revert()` | Stop the animation and remove the styles anime.js added, when another effect is picked |
+| `viewBox="0 0 7439 1140"` | The SVG's own coordinate system (font units: 1000 = 1em). `height: 1.14em` makes it the same size as the text |
+| `path d="M50 2 a48 48 0 1 1 0 96 a48 48 0 1 1 0 -96"` | A circle as a path: start at the top, two half-circle arcs, clockwise |
+
+**Remember:** if my name changes in `portfolio.js`, `DrawnName.jsx` must be generated again.
+
 ---
 
 ## What I learned

@@ -5,6 +5,7 @@ import { personal, highlights } from "@/data/portfolio";
 import SocialLinks from "@/components/ui/SocialLinks";
 import HeroScene from "@/components/HeroScene";
 import EffectPicker from "@/components/EffectPicker";
+import DrawnName from "@/components/DrawnName";
 
 // Which icon to show for each highlight in the data file
 const highlightIcons = {
@@ -75,23 +76,27 @@ export default function Hero() {
             aria-label={personal.name}
             className="hero-name mt-2 text-4xl font-bold tracking-tight sm:text-6xl"
           >
-            {nameWords.map((word, w) => (
-              <Fragment key={w}>
-                {w > 0 && " "}
-                {/* whitespace-nowrap: a word never breaks in the middle */}
-                <span className="inline-block whitespace-nowrap">
-                  {word.map(({ letter, i }) => (
-                    <span
-                      key={i}
-                      className="hero-letter inline-block"
-                      style={{ "--i": i }}
-                    >
-                      {letter}
-                    </span>
-                  ))}
-                </span>
-              </Fragment>
-            ))}
+            <span className="hero-name-text">
+              {nameWords.map((word, w) => (
+                <Fragment key={w}>
+                  {w > 0 && " "}
+                  {/* whitespace-nowrap: a word never breaks in the middle */}
+                  <span className="inline-block whitespace-nowrap">
+                    {word.map(({ letter, i }) => (
+                      <span
+                        key={i}
+                        className="hero-letter inline-block"
+                        style={{ "--i": i }}
+                      >
+                        {letter}
+                      </span>
+                    ))}
+                  </span>
+                </Fragment>
+              ))}
+            </span>
+            {/* The same name as SVG outlines, only shown for the "Draw" effect */}
+            <DrawnName />
           </h1>
         </Reveal>
 
@@ -184,6 +189,21 @@ export default function Hero() {
                     </div>
                   )}
                 </div>
+
+                {/* "Draw" effect: a circle line around my photo, drawn by anime.js.
+                    Hidden unless the Draw effect is on. -inset-3 = a bit bigger than the photo.
+                    The path is 2 half circles, starting at the top, going clockwise */}
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 100 100"
+                  className="hero-photo-draw pointer-events-none absolute -inset-3 text-cyan-700 dark:text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                >
+                  <path d="M50 2 a48 48 0 1 1 0 96 a48 48 0 1 1 0 -96" />
+                </svg>
 
                 {/* Chat bubble: rounded box, with a sharp bottom-left corner (rounded-bl-sm)
                     like a message tail pointing at me. scale-0 = hidden until hover.

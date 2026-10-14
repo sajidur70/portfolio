@@ -139,6 +139,34 @@ html {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-14px); }
 }
+/* Draw: my name as SVG outlines (DrawnName.jsx), animated by anime.js in EffectPicker.
+   Hidden unless the "Draw" effect is on; then the normal letters are hidden instead. */
+.hero-name-draw {
+  display: none;
+  height: 1.14em; /* same size as the text: the SVG is 1.14em tall (ascender + descender) */
+  width: auto;
+  /* Negative margins make it take 1em of space (like the text), so the heading
+     doesn't get taller. vertical-align puts its bottom 0.22em below the baseline
+     (-0.15em margin edge - 0.07em margin), where the text's descender ends. */
+  margin-block: -0.07em;
+  vertical-align: -0.15em;
+  fill-opacity: 0; /* start as outline only; anime.js fills it in */
+}
+body[data-fx="draw"] .hero-name-draw {
+  display: inline-block;
+}
+body[data-fx="draw"] .hero-name-text {
+  display: none;
+}
+/* The circle line around my photo: same idea, hidden unless "Draw" is on */
+.hero-photo-draw {
+  display: none;
+  filter: drop-shadow(0 0 4px currentColor); /* soft glow around the line */
+}
+body[data-fx="draw"] .hero-photo-draw {
+  display: block;
+}
+
 /* perspective(...) = how far away the "camera" is, so the turn looks 3D.
    Flip in the first 30% of the time, then rest. 360deg looks the same as 0deg,
    so the jump back at the end of each loop is invisible. */
