@@ -24,7 +24,7 @@
 | | 11 | **Light / dark mode toggle** (added 15 Oct) | ✅ |
 | | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ✅ |
 | **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ✅ |
-| | 14 | Hero (name, title, buttons, socials) | ⬜ |
+| | 14 | Hero (name, title, buttons, socials) | ✅ |
 | | 15 | 3D scene in Hero (Spline) | ⬜ |
 | | 16 | About (photo + bio) | ⬜ |
 | | 17 | Skills (cards with icons) | ⬜ |
@@ -1179,6 +1179,304 @@ export default function Home() {
 git status
 git add .
 git commit -m "Add Navbar with mobile menu and theme toggle"
+git push
+```
+
+---
+
+### Step 14: Hero (the first screen) ✅
+
+**Why:** Recruiters decide in **about 5 seconds** if they keep reading. The Hero must say clearly: **who I am, what I do, how to contact me**.
+
+> Claude tested this exact code in my project first (then removed it so I can type it): ESLint ✅, build ✅, the page shows one `<h1>` with my name, the buttons, the "SR" circle, the GitHub + Email icons ✅. LinkedIn is hidden because its url is still `""`.
+
+**What it has:**
+- **Left side:** "Hi, my name is" → my **name** (big, the only `<h1>`) → my **title** → my **intro**
+- **Buttons:** **View Projects** (→ `#projects`), **Contact Me** (→ `#contact`), **Resume** (hidden until I add it)
+- **Social icons:** GitHub, LinkedIn (when I add the url), Email
+- **Right side:** a glowing circle with my initials **"SR"**. **Step 15 replaces it with the 3D scene.**
+- **Animation:** each part fades in a little after the one before (`delay` 0 → 0.5s)
+- **Phones:** everything is stacked and centered. **Desktop (≥ 768px):** text left, circle right
+
+> ✅ **15 Oct: Claude built a recruiter-focused Hero** (I asked, and gave my LinkedIn URL).
+> LinkedIn blocks automatic reading (error 999), so Claude used my **GitHub profile README** instead: "Full Stack Web Developer | MERN Stack | AI-Assisted Development", CSE graduate, 500 LeetCode solutions repo, Jessore, Bangladesh.
+> Changes vs. the first plan: title → **Full Stack Developer**, new intro, green **"Open to junior full-stack roles"** badge, **quick facts** row (CSE Graduate · 500+ LeetCode · Jessore), gradient title, LinkedIn icon added.
+> ESLint ✅, build ✅, page renders all parts ✅, tab title + Google description updated automatically (they read `personal`) ✅. Committed and pushed.
+> ⚠️ **My part:** check that every fact is TRUE (e.g. "500+ LeetCode problems"). Recruiters may ask about it. Change it in `portfolio.js` if needed.
+
+#### 14.0 Data changes in `src/data/portfolio.js`
+
+- `personal.title` → `"Full Stack Developer"`
+- `personal.intro` → *"CSE graduate building full-stack web apps with MongoDB, Express, React and Node.js. I use AI tools to code faster and debug smarter, and I understand every line I ship."*
+- `personal.location` → `"Jessore, Bangladesh"`
+- **New** `personal.availability` → `"Open to junior full-stack roles"` (`""` hides the badge)
+- **New** `highlights` array → the quick facts (`{ icon, text }`). The location fact uses `personal.location`, so I write it only once
+- `socials` → LinkedIn url added
+
+#### 14.1 Create `src/components/ui/SocialLinks.jsx`
+
+A small component for the social icons. I'll reuse it in the Hero, Contact and Footer.
+
+```js
+import { FaGithub, FaLinkedin } from "react-icons/fa";
+import { FiLink, FiMail } from "react-icons/fi";
+import { personal, socials } from "@/data/portfolio";
+
+// Which icon to show for each social "name" in the data file
+const icons = {
+  GitHub: FaGithub,
+  LinkedIn: FaLinkedin,
+};
+
+// Round icon links: GitHub, LinkedIn (when it has a url) and Email.
+// Reused in the Hero, Contact and Footer.
+export default function SocialLinks({ className = "" }) {
+  // Keep only links that have a url ("" = hidden)
+  const visibleSocials = socials.filter((social) => social.url);
+
+  const linkStyle =
+    "flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:-translate-y-1 hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-cyan-400 dark:hover:text-cyan-400";
+
+  return (
+    <ul className={`flex gap-4 ${className}`}>
+      {visibleSocials.map((social) => {
+        const Icon = icons[social.name] ?? FiLink; // FiLink if no icon is set
+        return (
+          <li key={social.name}>
+            <a
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={social.name}
+              className={linkStyle}
+            >
+              <Icon className="h-5 w-5" />
+            </a>
+          </li>
+        );
+      })}
+      <li>
+        <a
+          href={`mailto:${personal.email}`}
+          aria-label="Email"
+          className={linkStyle}
+        >
+          <FiMail className="h-5 w-5" />
+        </a>
+      </li>
+    </ul>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `const icons = { GitHub: FaGithub, ... }` | An object that maps a **name** to an **icon component** |
+| `socials.filter((social) => social.url)` | `.filter()` keeps only items where the function returns true. `""` counts as false, so links without a url are removed |
+| `const Icon = icons[social.name]` | Look up the icon by name. `icons["GitHub"]` → `FaGithub`. The variable starts with a **capital letter**, so I can use it as `<Icon />` |
+| `?? FiLink` | **Nullish coalescing**: if no icon is found (`undefined`), use `FiLink` instead |
+| `` `mailto:${personal.email}` `` | A `mailto:` link opens the visitor's email app |
+| `` className={`flex gap-4 ${className}`} `` | Combine my classes with extra classes passed in as a prop |
+| `aria-label="GitHub"` | The link has only an icon, so screen readers need a name |
+| `hover:-translate-y-1` | Move up 4px on hover (a small "lift") |
+
+#### 14.2 Create `src/components/Hero.jsx`
+
+```js
+import { FiBookOpen, FiCode, FiMapPin } from "react-icons/fi";
+import { personal, highlights } from "@/data/portfolio";
+import FadeIn from "@/components/ui/FadeIn";
+import SocialLinks from "@/components/ui/SocialLinks";
+
+// Which icon to show for each highlight in the data file
+const highlightIcons = {
+  education: FiBookOpen,
+  code: FiCode,
+  location: FiMapPin,
+};
+
+// Same style for the 2nd and 3rd buttons
+const outlineButton =
+  "rounded-full border border-slate-300 px-6 py-3 font-medium transition hover:scale-105 hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400";
+
+// The first screen visitors see: who I am, what I do, how to reach me.
+export default function Hero() {
+  // Initials for the circle: "Sajidur Rahman" → ["Sajidur", "Rahman"] → ["S", "R"] → "SR"
+  const initials = personal.name
+    .split(" ")
+    .map((word) => word[0])
+    .join("");
+
+  return (
+    <section
+      id="home"
+      className="mx-auto flex min-h-screen max-w-5xl flex-col items-center justify-center gap-12 px-6 pt-24 pb-16 md:flex-row md:justify-between"
+    >
+      {/* Left: text. Each part fades in a little after the one before (delay) */}
+      <div className="max-w-xl text-center md:text-left">
+        {/* "Open to work" badge with a pulsing green dot */}
+        {personal.availability && (
+          <FadeIn>
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              {personal.availability}
+            </p>
+          </FadeIn>
+        )}
+
+        <FadeIn delay={0.1}>
+          <p className="mt-6 font-mono text-cyan-600 dark:text-cyan-400">
+            Hi, my name is
+          </p>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
+            {personal.name}
+          </h1>
+        </FadeIn>
+
+        <FadeIn delay={0.2}>
+          {/* Gradient text: a gradient background, clipped to the letters */}
+          <p className="mt-3 bg-linear-to-r from-cyan-600 to-blue-600 bg-clip-text text-2xl font-semibold text-transparent sm:text-3xl dark:from-cyan-400 dark:to-blue-400">
+            {personal.title}
+          </p>
+        </FadeIn>
+
+        <FadeIn delay={0.3}>
+          <p className="mt-6 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+            {personal.intro}
+          </p>
+        </FadeIn>
+
+        {/* Quick facts: CSE Graduate · 500+ LeetCode · Location */}
+        <FadeIn delay={0.4}>
+          <ul className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-slate-600 md:justify-start dark:text-slate-400">
+            {highlights.map((item) => {
+              const Icon = highlightIcons[item.icon] ?? FiCode;
+              return (
+                <li key={item.text} className="flex items-center gap-2">
+                  <Icon className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
+                  {item.text}
+                </li>
+              );
+            })}
+          </ul>
+        </FadeIn>
+
+        <FadeIn delay={0.5}>
+          <div className="mt-8 flex flex-wrap justify-center gap-4 md:justify-start">
+            <a
+              href="#projects"
+              className="rounded-full bg-cyan-600 px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+            >
+              View Projects
+            </a>
+            <a href="#contact" className={outlineButton}>
+              Contact Me
+            </a>
+            {/* Resume button: only shown when resumeUrl is not empty */}
+            {personal.resumeUrl && (
+              <a
+                href={personal.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={outlineButton}
+              >
+                Resume
+              </a>
+            )}
+          </div>
+        </FadeIn>
+
+        <FadeIn delay={0.6}>
+          <SocialLinks className="mt-8 justify-center md:justify-start" />
+        </FadeIn>
+      </div>
+
+      {/* Right: placeholder circle with my initials. Step 15 replaces it with the 3D scene */}
+      <FadeIn delay={0.3}>
+        <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
+          {/* Soft glowing gradient behind the circle */}
+          <div className="absolute inset-0 animate-pulse rounded-full bg-linear-to-br from-cyan-400 to-blue-600 opacity-30 blur-3xl" />
+          <div className="relative flex h-48 w-48 items-center justify-center rounded-full border border-slate-200 bg-white/50 font-mono text-5xl font-bold text-cyan-600 backdrop-blur sm:h-60 sm:w-60 dark:border-slate-800 dark:bg-slate-900/50 dark:text-cyan-400">
+            {initials}
+          </div>
+        </div>
+      </FadeIn>
+    </section>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `{personal.availability && ( ... )}` | Show the green badge only when `availability` is not empty |
+| `animate-ping` | Tailwind animation: the dot grows and fades again and again (a "live" signal) |
+| `bg-linear-to-r ... bg-clip-text text-transparent` | **Gradient text**: a gradient background, cut to the shape of the letters, with transparent text color |
+| `highlights.map(...)` + `highlightIcons[item.icon]` | Same pattern as `SocialLinks`: look up the icon by name, then render it |
+| `const outlineButton = "..."` | Classes used by 2 buttons, stored once in a variable (don't repeat yourself) |
+| `.split(" ").map((word) => word[0]).join("")` | **Method chaining**: split the name into words → take the first letter of each → join them → `"SR"` |
+| `<h1>` | My name is the **only `<h1>`** on the site (good for SEO). All sections use `<h2>` |
+| `<FadeIn delay={0.1}>`, `0.2`, `0.3`... | Each part starts a bit later → a **stagger** effect |
+| `flex-col ... md:flex-row` | Phones: stacked (column). Desktop: side by side (row) |
+| `text-center md:text-left` | Centered on phones, left-aligned on desktop |
+| `pt-24` | Space at the top so the fixed Navbar doesn't cover the text |
+| `sm:text-6xl` | The name gets much bigger on screens ≥ 640px |
+| `hover:scale-105` | Buttons grow 5% on hover |
+| `animate-pulse` + `blur-3xl` | A soft glow behind the circle that slowly pulses |
+| `absolute inset-0` / `relative` | The glow sits **behind** the circle, filling the same space |
+| No `"use client"` | The Hero is a **Server Component**. Only `FadeIn` inside it runs in the browser |
+
+#### 14.3 Update `src/app/page.js`
+
+The old hero `<section>` is replaced by `<Hero />`. `personal` is no longer imported here (the Hero uses it).
+
+```js
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import SectionHeading from "@/components/ui/SectionHeading";
+import FadeIn from "@/components/ui/FadeIn";
+
+// The home page: puts all sections in order.
+export default function Home() {
+  return (
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+
+        {/* Test section: scroll down to see the fade-in. Step 16 replaces it with the real About */}
+        <section id="about" className="mx-auto max-w-5xl px-6 py-24">
+          <FadeIn>
+            <SectionHeading
+              number="01"
+              title="About Me"
+              subtitle="Who I am and what I do"
+            />
+          </FadeIn>
+        </section>
+      </main>
+    </>
+  );
+}
+```
+
+#### 14.4 Check
+
+1. `npm run dev` → http://localhost:3000
+2. On load, the text **fades in one by one**, then the buttons and icons
+3. **View Projects** / **Contact Me** don't scroll yet (those sections come in Steps 18–19). That's expected
+4. The GitHub icon opens my GitHub in a new tab. The ✉️ icon opens my email app
+5. **Phone view** (`F12` → `Ctrl + Shift + M`): everything is stacked and centered, and nothing goes off the screen
+6. Light and dark mode both look good
+
+#### 14.5 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add Hero section and social links"
 git push
 ```
 
