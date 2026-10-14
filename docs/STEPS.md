@@ -3174,6 +3174,11 @@ Result at `/sitemap.xml`:
 | `priority: 1` | A hint: how important this page is compared to my other pages (0.0 – 1.0) |
 | No `lastModified: new Date()` | The Next.js docs example uses it, but Next.js 16 with Cache Components rejects `new Date()` in static files (same as the Footer, Step 20). It's optional, so I left it out |
 
+> ✅ **15 Oct: Google Search Console verification file added.** I chose the **HTML file** method. Claude created `public/google159425fa80a03f3e.html` with exactly the line Google gave me (`google-site-verification: google159425fa80a03f3e.html`) and pushed it.
+> Files in `public/` are served at the root of my site → https://sajidur-rahman.vercel.app/google159425fa80a03f3e.html
+> ⚠️ **Never delete this file**, or Google will un-verify my site.
+> ⬜ My part: click **Verify** in Search Console → then **Sitemaps** → `sitemap.xml` → **Submit**.
+
 **Optional next step (my part, 10 min): Google Search Console**
 1. https://search.google.com/search-console → **Add property** → **URL prefix** → `https://sajidur-rahman.vercel.app`
 2. Verify with the **HTML tag** method → send the tag to Claude (it goes in `layout.js` metadata)
