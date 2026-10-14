@@ -46,10 +46,8 @@ Spend **max 1 week** on the portfolio, then build projects.
 
 ✅ **Decided (14 Oct):** `C:\Users\sajid\OneDrive\Desktop\own-portfolio`
 
-This folder is **inside OneDrive**, and `node_modules` has **thousands of files**.
-To avoid slow installs and strange errors:
-- **Pause OneDrive sync** before `npm install` or `create-next-app` (OneDrive icon → Settings → Pause syncing).
-- If the dev server acts strangely (files "in use", missing files), pause sync and restart `npm run dev`.
+The path says `OneDrive`, but **I removed OneDrive** (14 Oct), so nothing syncs this folder. No problem with `node_modules`.
+- If I ever turn OneDrive on again: pause syncing before `npm install`, because `node_modules` has thousands of files.
 - GitHub is my real backup. Push often.
 
 ---

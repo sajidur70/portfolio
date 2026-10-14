@@ -137,8 +137,8 @@ Don't spend more than ~1 week on the portfolio. After that, focus on building pr
 ## 5. Basic Setup (step by step)
 
 > Location: `C:\Users\sajid\OneDrive\Desktop\own-portfolio` (chosen 14 Oct 2026).
-> ⚠️ This folder is **inside OneDrive**. OneDrive tries to sync `node_modules` (thousands of files), which can make installs slow and break things.
-> **Pause OneDrive sync** before `create-next-app` or `npm install`.
+> The path says `OneDrive`, but OneDrive is removed from my computer (14 Oct 2026), so nothing syncs this folder.
+> If I turn OneDrive on again, pause syncing before `npm install` (`node_modules` has thousands of files).
 > My exact commands and results are logged in `docs/STEPS.md`.
 
 ### Step 1: Create the Next.js app
