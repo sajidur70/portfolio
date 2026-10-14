@@ -32,7 +32,7 @@
 | | 19 | Contact form (Web3Forms) | 🔄 |
 | | 20 | Footer | ✅ |
 | **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
-| | 22 | SEO: favicon, social preview image | ⬜ |
+| | 22 | SEO: favicon ✅, social preview image ⬜ | 🔄 |
 | | 23 | README for recruiters | ⬜ |
 | | 24 | Lighthouse + final checks → share my link | ⬜ |
 
@@ -2825,6 +2825,75 @@ Added `import Footer from "@/components/Footer";` and `<Footer />` **after** `</
 
 1. Scroll to the bottom → footer with © 2026, icons and **Back to top ↑**
 2. Click **Back to top** → smooth scroll to the Hero
+
+---
+
+## Part 4: Polish and launch
+
+### Step 22: Favicon + social preview image 🔄
+
+#### 22.1 Favicon: my "SR" monogram ✅
+
+> ✅ **15 Oct: Claude made the favicon** (I asked for "plan 1, item 1"). ESLint ✅, build ✅, `/icon` (32×32) and `/apple-icon` (180×180) are generated ✅, the old Next.js `favicon.ico` is deleted (`/favicon.ico` → 404) ✅. Committed and pushed.
+
+**Before:** the Next.js ▲ logo in the browser tab. **After:** white **"SR"** on a **cyan → blue** gradient square.
+
+**Files:**
+- `src/app/icon.js`: the browser tab icon (32×32, rounded corners)
+- `src/app/apple-icon.js`: the iPhone/iPad home screen icon (180×180, iOS rounds the corners itself)
+- `src/app/favicon.ico`: **deleted** (`git rm`)
+
+`src/app/icon.js`:
+
+```js
+import { ImageResponse } from "next/og";
+import { personal } from "@/data/portfolio";
+
+// Browser tab icon (favicon). Next.js draws this as a PNG at build time.
+export const size = { width: 32, height: 32 };
+export const contentType = "image/png";
+
+// "Sajidur Rahman" → "SR"
+const initials = personal.name
+  .split(" ")
+  .map((word) => word[0])
+  .join("");
+
+export default function Icon() {
+  return new ImageResponse(
+    // ImageResponse only understands inline styles (no Tailwind classes)
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #06b6d4, #2563eb)", // cyan → blue
+        borderRadius: 8,
+        color: "white",
+        fontSize: 16,
+        fontWeight: 700,
+        letterSpacing: -1,
+      }}
+    >
+      {initials}
+    </div>,
+    { ...size },
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| File name `icon.js` / `apple-icon.js` in `src/app/` | **File convention**: Next.js sees these names and automatically adds `<link rel="icon">` / `<link rel="apple-touch-icon">` to every page |
+| `ImageResponse` from `next/og` | Draws an **image (PNG) from JSX** at build time. Same tool as for the social preview image |
+| `export const size` / `contentType` | Tell Next.js the image size and type (used in the `<link>` tag) |
+| `style={{ ... }}` (inline styles) | `ImageResponse` doesn't know Tailwind, so styles are written as a JavaScript object (`camelCase`: `justifyContent`, `borderRadius`) |
+| `display: "flex"` | Required by `ImageResponse` for any element with more than one child, and for centering |
+| Initials from `personal.name` | Same `.split().map().join()` trick as the Hero. If my name changes, the icon updates |
+
+**Check:** open https://sajidur-rahman.vercel.app → the browser tab shows **SR**. (If I still see the old ▲: hard refresh with `Ctrl + Shift + R`, because browsers keep favicons in cache for a long time.)
 
 ---
 
