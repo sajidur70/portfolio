@@ -143,7 +143,15 @@ npm install motion react-icons @splinetool/react-spline
 
 **Check:** open `package.json`. Under `"dependencies"` I now see `motion`, `react-icons` and `@splinetool/react-spline`.
 
-### Step 6: Clean the starter files ⬜
+### Step 6: Clean the starter files ✅
+
+> ✅ **15 Oct, Claude's review:**
+> - `page.js` and `globals.css` are correct. The `<p>` is split over 3 lines because **Prettier** formatted it on save. Same result, cleaner code.
+> - `public/` is empty and the demo SVGs are gone.
+> - Commit `05d060e Clean starter files and install packages` is a good message (starts with a verb, says what changed).
+> - `npm run lint` → no errors. `npm run build` → **compiled successfully**, the `/` page is built as static HTML.
+> - **Tip:** `public/` is empty now, and git doesn't save empty folders. That's fine. It comes back when I add `profile.jpg`.
+> - **Why run `npm run build`?** Vercel runs this same command when I deploy. If it fails on my computer, it will fail on Vercel too, so always test it before pushing.
 
 **Why:** The starter page is Next.js's demo. I remove it so I start from a clean, empty page that is **mine**.
 
@@ -239,6 +247,55 @@ git commit -m "Clean starter files and install packages"
 **Check:** `git log --oneline` shows 2 commits.
 
 ### Step 7: Push to GitHub ⬜
+
+**My GitHub:** https://github.com/sajidur70
+**Repo name:** `portfolio` → https://github.com/sajidur70/portfolio
+(The folder on my computer is `own-portfolio`. The repo name can be different, that's OK.)
+
+#### 7.1 Fix my git name (one time, optional but recommended)
+
+Right now my commits show the name `sajidur319370`. Recruiters see this name on every commit, so use my real name:
+
+```powershell
+git config --global user.name "Sajidur Rahman"
+```
+
+Also check: GitHub → profile picture → **Settings → Emails**. `sajidurrahmansahib@gmail.com` must be there.
+Otherwise GitHub can't connect my commits to my account (no green squares on my profile).
+
+#### 7.2 Create the repository on GitHub
+
+1. Go to https://github.com → **+** (top right) → **New repository**
+2. **Repository name:** `portfolio`
+3. **Public** (recruiters must see it)
+4. ❌ **Don't** add a README, .gitignore or license. My project already has files, and these would cause a conflict.
+5. Click **Create repository**
+
+#### 7.3 Commit my latest changes
+
+```powershell
+git add .
+git commit -m "Update steps log"
+```
+
+#### 7.4 Connect and push
+
+```powershell
+git branch -M main
+git remote add origin https://github.com/sajidur70/portfolio.git
+git push -u origin main
+```
+
+| Command | Meaning |
+|---|---|
+| `git branch -M main` | Rename my branch from `master` to `main` (the modern default name; Vercel deploys `main`) |
+| `git remote add origin <url>` | Save the GitHub link under the name `origin` |
+| `git push -u origin main` | Upload my commits to GitHub. `-u` remembers "origin main", so next time I only type `git push` |
+
+**First push only:** a window opens and asks me to **sign in to GitHub** → choose **Sign in with your browser** → **Authorize**. Windows remembers it after that.
+
+**Check:** refresh https://github.com/sajidur70/portfolio. I see `src/`, `docs/`, `package.json`...
+`node_modules/` and `.next/` are **not** there (because of `.gitignore`). ✅ Correct!
 
 ### Step 8: Deploy to Vercel ⬜
 
