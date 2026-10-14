@@ -32,7 +32,7 @@
 | | 19 | Contact form (Web3Forms) | 🔄 |
 | | 20 | Footer | ✅ |
 | **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
-| | 22 | SEO: favicon ✅, social preview image ⬜ | 🔄 |
+| | 22 | SEO: favicon ✅, social preview image ✅ | ✅ |
 | | 23 | README for recruiters | ⬜ |
 | | 24 | Lighthouse + final checks → share my link | ⬜ |
 
@@ -2830,7 +2830,7 @@ Added `import Footer from "@/components/Footer";` and `<Footer />` **after** `</
 
 ## Part 4: Polish and launch
 
-### Step 22: Favicon + social preview image 🔄
+### Step 22: Favicon + social preview image ✅
 
 #### 22.1 Favicon: my "SR" monogram ✅
 
@@ -2894,6 +2894,204 @@ export default function Icon() {
 | Initials from `personal.name` | Same `.split().map().join()` trick as the Hero. If my name changes, the icon updates |
 
 **Check:** open https://sajidur-rahman.vercel.app → the browser tab shows **SR**. (If I still see the old ▲: hard refresh with `Ctrl + Shift + R`, because browsers keep favicons in cache for a long time.)
+
+#### 22.2 Social preview image (Open Graph) ✅
+
+> ✅ **15 Oct: Claude made it** (I asked for "item 2"). ESLint ✅, build ✅, the image is **static** (built once) ✅, `og:image` + `twitter:card` tags are on the page ✅. Committed and pushed.
+
+**Before:** sharing my link on LinkedIn / WhatsApp showed **no image**. **After:** this 1200×630 card:
+
+![My social preview image](images/social-preview.png)
+
+**File:** `src/app/opengraph-image.js`
+
+```js
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { ImageResponse } from "next/og";
+import { personal } from "@/data/portfolio";
+
+// The preview image LinkedIn, WhatsApp, Facebook and X show when I share my link.
+// Next.js draws it as a PNG at build time (1200×630 is the standard size).
+export const alt = `${personal.name} | ${personal.title}`;
+export const size = { width: 1200, height: 630 };
+export const contentType = "image/png";
+
+// Load a Google Font as a .ttf file (ImageResponse can't use woff2).
+// If it fails (e.g. no internet), return null → the default font is used.
+async function loadGoogleFont(family, weight) {
+  try {
+    const cssUrl = `https://fonts.googleapis.com/css2?family=${family}:wght@${weight}`;
+    const css = await (await fetch(cssUrl)).text();
+    const fontUrl = css.match(/src: url\((.+?)\) format\('truetype'\)/)?.[1];
+    if (!fontUrl) return null;
+    return await (await fetch(fontUrl)).arrayBuffer();
+  } catch {
+    return null;
+  }
+}
+
+// Load my photo + fonts once at build time ("use cache"), so the image is static:
+// no font downloads and no file reading when someone shares my link.
+async function getAssets() {
+  "use cache";
+  // My photo from public/ as a "data URL" (the image file written as text)
+  const photoFile = await readFile(
+    join(process.cwd(), "public", "profile.png"),
+  );
+  const photo = `data:image/png;base64,${photoFile.toString("base64")}`;
+
+  const [regular, bold] = await Promise.all([
+    loadGoogleFont("Inter", 400),
+    loadGoogleFont("Inter", 700),
+  ]);
+  return { photo, regular, bold };
+}
+
+export default async function OpengraphImage() {
+  const { photo, regular, bold } = await getAssets();
+  const fonts = [
+    regular && { name: "Inter", data: regular, weight: 400, style: "normal" },
+    bold && { name: "Inter", data: bold, weight: 700, style: "normal" },
+  ].filter(Boolean);
+
+  const skills = ["React", "Next.js", "Node.js", "Express", "MongoDB"];
+
+  return new ImageResponse(
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "70px 80px",
+        backgroundColor: "#020617", // slate-950, same as my dark mode
+        backgroundImage:
+          "radial-gradient(circle at 85% 30%, rgba(6,182,212,0.35), transparent 45%), radial-gradient(circle at 10% 100%, rgba(37,99,235,0.3), transparent 40%)",
+        color: "#f1f5f9",
+        fontFamily: "Inter",
+      }}
+    >
+      {/* Left: text */}
+      <div style={{ display: "flex", flexDirection: "column", width: 680 }}>
+        {personal.availability && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              alignSelf: "flex-start",
+              gap: 12,
+              padding: "8px 20px",
+              borderRadius: 999,
+              border: "2px solid rgba(16,185,129,0.4)",
+              backgroundColor: "rgba(16,185,129,0.12)",
+              color: "#34d399",
+              fontSize: 24,
+            }}
+          >
+            <div
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: 999,
+                backgroundColor: "#10b981",
+              }}
+            />
+            {personal.availability}
+          </div>
+        )}
+
+        <div
+          style={{
+            marginTop: 36,
+            fontSize: 76,
+            fontWeight: 700,
+            letterSpacing: -2,
+            lineHeight: 1.05,
+          }}
+        >
+          {personal.name}
+        </div>
+
+        <div
+          style={{
+            marginTop: 14,
+            fontSize: 40,
+            fontWeight: 700,
+            color: "#22d3ee", // cyan-400
+          }}
+        >
+          {personal.title}
+        </div>
+
+        {/* Skill tags */}
+        <div
+          style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 36 }}
+        >
+          {skills.map((skill) => (
+            <div
+              key={skill}
+              style={{
+                padding: "8px 18px",
+                borderRadius: 10,
+                backgroundColor: "rgba(34,211,238,0.12)",
+                color: "#a5f3fc",
+                fontSize: 24,
+              }}
+            >
+              {skill}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 40, fontSize: 26, color: "#94a3b8" }}>
+          {personal.siteUrl.replace("https://", "")}
+        </div>
+      </div>
+
+      {/* Right: my photo with a gradient ring */}
+      <div
+        style={{
+          display: "flex",
+          padding: 8,
+          borderRadius: 999,
+          backgroundImage: "linear-gradient(135deg, #22d3ee, #2563eb)",
+        }}
+      >
+        {/* ImageResponse needs a plain <img> (next/image doesn't work here) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={photo}
+          alt=""
+          width={300}
+          height={300}
+          style={{ borderRadius: 999, objectFit: "cover" }}
+        />
+      </div>
+    </div>,
+    { ...size, fonts },
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| File name `opengraph-image.js` | **File convention**: Next.js adds `<meta property="og:image">` (and the X/Twitter tags) to my page automatically |
+| `export const alt` | Text description of the image (accessibility) |
+| `readFile(join(process.cwd(), "public", "profile.png"))` | Read my photo file with **Node.js** (`fs`). `process.cwd()` = the project folder |
+| `` `data:image/png;base64,${...}` `` | A **data URL**: the image written as text, so it can go straight into `<img src>` |
+| `loadGoogleFont("Inter", 700)` | Download the **Inter** font (bold) from Google Fonts as `.ttf`. `try/catch` → if it fails, the default font is used |
+| `"use cache"` in `getAssets()` | Without it, the image was **dynamic** (ƒ): fonts downloaded on every request, and Vercel might not find my photo. With it, everything is loaded **once at build time** → static (○) |
+| `Promise.all([...])` | Run both font downloads **at the same time** and wait for both |
+| `.filter(Boolean)` | Remove `null` values (a font that failed to load) |
+| `<img>` with `eslint-disable-next-line` | `next/image` doesn't work inside `ImageResponse`, so a plain `<img>` is correct here. The comment tells ESLint this is on purpose |
+| `radial-gradient(...)` | The soft cyan and blue glows in the corners |
+
+**Check (my part):**
+1. Send my link to myself on **WhatsApp** (or paste it in a LinkedIn post draft, don't publish) → the card appears
+2. Or test it at https://www.opengraph.xyz → paste my link
+3. LinkedIn caches previews. If LinkedIn shows an old preview, use https://www.linkedin.com/post-inspector/ → paste my link → **Inspect** (it refreshes the cache)
 
 ---
 
