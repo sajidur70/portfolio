@@ -1,7 +1,9 @@
+import Image from "next/image";
 import { FiBookOpen, FiCode, FiMapPin } from "react-icons/fi";
 import { personal, highlights } from "@/data/portfolio";
 import FadeIn from "@/components/ui/FadeIn";
 import SocialLinks from "@/components/ui/SocialLinks";
+import HeroScene from "@/components/HeroScene";
 
 // Which icon to show for each highlight in the data file
 const highlightIcons = {
@@ -109,15 +111,34 @@ export default function Hero() {
         </FadeIn>
       </div>
 
-      {/* Right: placeholder circle with my initials. Step 15 replaces it with the 3D scene */}
+      {/* Right: 3D scene on desktop (when heroScene has a URL).
+          Fallback = my photo (phones, loading, no scene) */}
       <FadeIn delay={0.3}>
-        <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
-          {/* Soft glowing gradient behind the circle */}
-          <div className="absolute inset-0 animate-pulse rounded-full bg-linear-to-br from-cyan-400 to-blue-600 opacity-30 blur-3xl" />
-          <div className="relative flex h-48 w-48 items-center justify-center rounded-full border border-slate-200 bg-white/50 font-mono text-5xl font-bold text-cyan-600 backdrop-blur sm:h-60 sm:w-60 dark:border-slate-800 dark:bg-slate-900/50 dark:text-cyan-400">
-            {initials}
+        <HeroScene sceneUrl={personal.heroScene}>
+          <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
+            {/* Soft glowing gradient behind the photo */}
+            <div className="absolute inset-0 animate-pulse rounded-full bg-linear-to-br from-cyan-400 to-blue-600 opacity-30 blur-3xl" />
+            {/* Gradient ring: a gradient circle with padding, the photo sits inside */}
+            <div className="relative h-56 w-56 rounded-full bg-linear-to-br from-cyan-400 to-blue-600 p-1 sm:h-72 sm:w-72">
+              {personal.photo ? (
+                <Image
+                  src={personal.photo}
+                  alt={`Photo of ${personal.name}`}
+                  width={500}
+                  height={500}
+                  priority
+                  sizes="(min-width: 640px) 288px, 224px"
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                // No photo yet → show my initials
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-white font-mono text-5xl font-bold text-cyan-600 dark:bg-slate-900 dark:text-cyan-400">
+                  {initials}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </HeroScene>
       </FadeIn>
     </section>
   );

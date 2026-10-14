@@ -11,9 +11,12 @@ export const personal = {
   // Shown as a green badge in the Hero. Set to "" to hide it.
   availability: "Open to junior full-stack roles",
   email: "sajidurrahmansahib@gmail.com",
-  photo: "/profile.jpg", // I add this image in Step 16
+  photo: "/profile.png", // My photo in public/profile.png (Hero + About)
   resumeUrl: "", // Empty = the Resume button stays hidden. Later: "/resume.pdf"
   siteUrl: "https://sajidur-rahman.vercel.app", // My live link
+  // 3D scene in the Hero: my Spline ".splinecode" URL (Step 15).
+  // Empty = show the "SR" circle instead.
+  heroScene: "",
 };
 
 // ----- Quick facts in the Hero -----

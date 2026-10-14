@@ -25,7 +25,7 @@
 | | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ✅ |
 | **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ✅ |
 | | 14 | Hero (name, title, buttons, socials) | ✅ |
-| | 15 | 3D scene in Hero (Spline) | ⬜ |
+| | 15 | 3D scene in Hero (Spline) → **my photo** for now, 3D optional | ✅ |
 | | 16 | About (photo + bio) | ⬜ |
 | | 17 | Skills (cards with icons) | ⬜ |
 | | 18 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
@@ -36,7 +36,7 @@
 | | 23 | README for recruiters | ⬜ |
 | | 24 | Lighthouse + final checks → share my link | ⬜ |
 
-**Things I need to prepare (Claude tells me when):** LinkedIn URL (any time) · Spline account + scene (Step 15) · profile photo (Step 16) · Web3Forms key (Step 19)
+**Things I need to prepare (Claude tells me when):** LinkedIn URL (any time) · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key (Step 19)
 
 **Design rule (from 15 Oct):** the site has **light and dark mode**. Every color I add needs **both**: a light class and a `dark:` class, e.g. `text-slate-600 dark:text-slate-400`.
 
@@ -1477,6 +1477,144 @@ export default function Home() {
 git status
 git add .
 git commit -m "Add Hero section and social links"
+git push
+```
+
+---
+
+### Step 15: 3D scene in the Hero (Spline) ✅ (photo for now, 3D optional)
+
+**Why:** A 3D scene that moves with the mouse makes my portfolio memorable. But 3D is **heavy** (about 1 MB of JavaScript), so I load it **only when it helps**:
+
+| Visitor | What they see |
+|---|---|
+| Desktop / laptop (≥ 768px) | The **3D scene** (the "SR" circle shows while it loads, then the 3D fades in) |
+| Phone (< 768px) | The **"SR" circle**. The 3D code is **never downloaded**, so the site stays fast |
+| "Reduce motion" turned on in their computer settings | The **"SR" circle** (accessibility) |
+| No scene URL in the data file (`heroScene: ""`) | The **"SR" circle** |
+
+> ✅ **15 Oct: Claude wrote the code** (`HeroScene.jsx`, Hero update, `heroScene` in the data file). ESLint ✅, build ✅.
+> It used **Spline's demo scene** for testing only.
+> ✅ **15 Oct: my photo replaces the "SR" circle** (I asked). Claude copied `My Photos\sajid-formal-bg.png` → `public/profile.png` and set `photo: "/profile.png"`.
+> The Hero shows it round, with a cyan → blue **gradient ring** and a soft glow, using **`next/image`**: my 217 KB PNG is sent as an **18 KB WebP** automatically.
+> If `photo` is ever `""`, the "SR" initials show instead.
+> `heroScene` is set to `""` for now → **everyone sees my photo**. If I add my own Spline URL later, laptops show the 3D and phones keep the photo.
+> ESLint ✅, build ✅, committed and pushed.
+
+#### 15.1 The code (done by Claude)
+
+**`src/data/portfolio.js`**, in `personal`:
+
+```js
+  // 3D scene in the Hero: my Spline ".splinecode" URL (Step 15).
+  // Empty = show the "SR" circle instead.
+  heroScene: "https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode",
+```
+
+**`src/components/HeroScene.jsx`** (new):
+
+```js
+"use client";
+
+import dynamic from "next/dynamic";
+import { useState, useSyncExternalStore } from "react";
+
+// Load the Spline 3D library only in the browser, and only when it's needed.
+// It is big (about 1 MB), so phones never download it.
+const Spline = dynamic(() => import("@splinetool/react-spline"), {
+  ssr: false,
+});
+
+// Show 3D only on screens ≥ 768px AND when the visitor didn't ask for less motion.
+const QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)";
+
+// These 3 functions let React read a media query safely (and update when it changes).
+function subscribe(callback) {
+  const media = window.matchMedia(QUERY);
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+const getSnapshot = () => window.matchMedia(QUERY).matches; // in the browser
+const getServerSnapshot = () => false; // on the server: no 3D
+
+// The 3D scene in the Hero.
+// {children} = the fallback (my initials circle), shown when:
+//  - there is no scene URL yet, or
+//  - the screen is small / the visitor prefers less motion, or
+//  - the 3D scene is still loading
+export default function HeroScene({ sceneUrl, children }) {
+  const show3D = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
+  const [loaded, setLoaded] = useState(false);
+
+  if (!sceneUrl || !show3D) {
+    return children;
+  }
+
+  return (
+    <div className="relative flex h-[420px] w-[420px] items-center justify-center">
+      {/* Fallback while the scene loads */}
+      {!loaded && children}
+
+      <div
+        className={`absolute inset-0 transition-opacity duration-700 ${loaded ? "opacity-100" : "opacity-0"}`}
+      >
+        <Spline scene={sceneUrl} onLoad={() => setLoaded(true)} />
+      </div>
+    </div>
+  );
+}
+```
+
+**`src/components/Hero.jsx`**: the "SR" circle is now **inside** `<HeroScene sceneUrl={personal.heroScene}> ... </HeroScene>`, so it becomes the fallback (`children`).
+
+| Code | Meaning |
+|---|---|
+| `dynamic(() => import("..."), { ssr: false })` | **Lazy loading**: download the Spline library only when `<Spline>` is really shown, and only in the browser (`ssr: false` = not on the server) |
+| `QUERY = "(min-width: 768px) and (prefers-reduced-motion: no-preference)"` | A **media query** (like in CSS): "screen at least 768px wide AND the visitor didn't ask for less motion" |
+| `window.matchMedia(QUERY).matches` | Ask the browser: does this screen match the query? → `true` / `false` |
+| `useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)` | A React hook to read a value from **outside React** (here: the browser screen size). `subscribe` = listen for changes, `getSnapshot` = the value in the browser, `getServerSnapshot` = the value on the server (`false` → no 3D) |
+| `if (!sceneUrl \|\| !show3D) return children;` | **Early return**: no URL or small screen → show the fallback circle and stop here |
+| `useState(false)` + `onLoad={() => setLoaded(true)}` | Remember if the 3D finished loading. Until then, show the circle |
+| `opacity-0` → `opacity-100` + `transition-opacity duration-700` | The 3D **fades in** over 0.7s when it's ready |
+| `absolute inset-0` | The 3D canvas fills the whole box, on top of the circle |
+| `import Image from "next/image"` + `<Image src=... width={500} height={500} />` | Next.js image component: **resizes, compresses (WebP/AVIF) and lazy-loads** images automatically. `width`/`height` = the real size of my file, so the page doesn't "jump" while loading |
+| `priority` | Load this image **first** (it's at the top of the page) |
+| `sizes="(min-width: 640px) 288px, 224px"` | Tells the browser how big the image is shown (288px on screens ≥ 640px, else 224px), so it downloads the right size |
+| `object-cover` + `rounded-full` | Fill the circle without stretching, cut into a circle |
+| `alt={`Photo of ${personal.name}`}` | Text for screen readers and Google |
+| `p-1` on the gradient circle | 4px padding → the gradient shows as a **ring** around the photo |
+
+#### 15.2 Make MY scene in Spline (my part) ⬜
+
+1. Go to https://spline.design → **Sign up** (free, with Google or GitHub)
+2. Get a scene. Easiest way: **Community** (left menu) → search e.g. `abstract`, `robot`, `laptop`, `shapes`, `3d logo` → open one you like → **Remix** (copies it to my files)
+   - **Choose a simple scene** (few objects). Simple = fast.
+   - Scenes that **react to the mouse** (look at / follow the cursor) are the most fun.
+3. Make the background **transparent**, so it works in light **and** dark mode:
+   click an empty area of the canvas → right panel → **Background** → turn it **off** (or set opacity to 0)
+4. **Export** (top right) → **Code Export** → **React** → click **Generate Draft** / **Update** if it asks
+5. Copy the URL that ends in **`scene.splinecode`**, e.g. `https://prod.spline.design/AbC123xyz/scene.splinecode`
+6. Send the URL to Claude, or paste it into `heroScene` in `src/data/portfolio.js`
+
+> Note: on the free plan, Spline may show a small "Built with Spline" logo on the scene. That's OK.
+
+#### 15.3 Check
+
+1. `npm run dev` → http://localhost:3000 on my **laptop**: the circle shows, then the 3D scene fades in. Move the mouse over it
+2. **Phone view** (`F12` → `Ctrl + Shift + M`, then **refresh**): only the "SR" circle
+3. Light and dark mode both look good (transparent background!)
+4. If the 3D is slow or ugly: choose a simpler scene, or set `heroScene: ""` to keep the circle
+
+#### 15.4 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add 3D Spline scene to Hero"
 git push
 ```
 
