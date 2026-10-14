@@ -3262,6 +3262,36 @@ export default function NotFound() {
 
 **Check:** open https://sajidur-rahman.vercel.app/abc → my 404 page → click **Back to home**.
 
+#### 22.5 Vercel Web Analytics (visitor stats) ✅
+
+> ✅ **15 Oct: Claude added it** (I asked: "do the rest"). Installed `@vercel/analytics`, added `<Analytics />` to `layout.js`. ESLint ✅, build ✅. Committed and pushed.
+> ⬜ **My part (1 click):** Vercel → my project → **Analytics** tab → **Enable**. Data starts after the next visit.
+
+**What I get:** how many people visit, which **countries**, which **devices**, and where they came from (**referrers** like linkedin.com or github.com). Useful to see if recruiters open my link after I apply.
+**Privacy:** no cookies, no personal data, so no cookie banner needed. Free on the Hobby plan.
+
+```bash
+npm install @vercel/analytics
+```
+
+In `src/app/layout.js`:
+
+```js
+import { Analytics } from "@vercel/analytics/next";
+// ...
+      <body ...>
+        <ThemeProvider ...>{children}</ThemeProvider>
+        {/* Vercel Web Analytics: counts visitors (no cookies). Only active on Vercel */}
+        <Analytics />
+      </body>
+```
+
+| Code | Meaning |
+|---|---|
+| `@vercel/analytics/next` | The Next.js version of the package (it knows about Next.js page changes) |
+| `<Analytics />` in the **root layout** | Added once, it works on **every** page |
+| "Only active on Vercel" | On my computer (`npm run dev`) it does nothing, so my own testing doesn't count as visits |
+
 ---
 
 ### Step 23: README for recruiters ✅

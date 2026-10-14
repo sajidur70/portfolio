@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { Analytics } from "@vercel/analytics/next";
 import { personal } from "@/data/portfolio";
 import "./globals.css";
 
@@ -46,6 +47,8 @@ export default function RootLayout({ children }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
         </ThemeProvider>
+        {/* Vercel Web Analytics: counts visitors (no cookies). Only active on Vercel */}
+        <Analytics />
       </body>
     </html>
   );
