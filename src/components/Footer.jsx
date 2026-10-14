@@ -30,7 +30,7 @@ export default async function Footer() {
 
         <a
           href="#home"
-          className="flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400"
+          className="flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-cyan-700 dark:text-slate-400 dark:hover:text-cyan-400"
         >
           Back to top
           <FiArrowUp aria-hidden="true" />

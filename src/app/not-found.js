@@ -25,14 +25,14 @@ export default function NotFound() {
         {/* <Link> = Next.js link: goes to another page without a full reload */}
         <Link
           href="/"
-          className="flex items-center gap-2 rounded-full bg-cyan-600 px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+          className="flex items-center gap-2 rounded-full bg-cyan-700 px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-cyan-800 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
         >
           <FiArrowLeft aria-hidden="true" />
           Back to home
         </Link>
         <Link
           href="/#contact"
-          className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 font-medium transition hover:scale-105 hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400"
+          className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 font-medium transition hover:scale-105 hover:border-cyan-700 hover:text-cyan-700 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400"
         >
           <FiMail aria-hidden="true" />
           Contact me

@@ -20,7 +20,7 @@ export default function About() {
         <FadeIn delay={0.1}>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="mb-4 flex items-center gap-2 font-semibold">
-              <FiUser className="text-cyan-600 dark:text-cyan-400" />
+              <FiUser className="text-cyan-700 dark:text-cyan-400" />
               Quick info
             </p>
             {/* <dl> = description list: pairs of a term (dt) and its value (dd) */}
@@ -35,7 +35,7 @@ export default function About() {
                     {fact.href ? (
                       <a
                         href={fact.href}
-                        className="transition-colors hover:text-cyan-600 dark:hover:text-cyan-400"
+                        className="transition-colors hover:text-cyan-700 dark:hover:text-cyan-400"
                       >
                         {fact.value}
                       </a>
@@ -73,14 +73,14 @@ export default function About() {
           ))}
 
           <FadeIn delay={0.4}>
-            <blockquote className="mt-6 border-l-4 border-cyan-600 pl-4 text-slate-700 italic dark:border-cyan-400 dark:text-slate-300">
+            <blockquote className="mt-6 border-l-4 border-cyan-700 pl-4 text-slate-700 italic dark:border-cyan-400 dark:text-slate-300">
               &ldquo;{about.motto}&rdquo;
             </blockquote>
           </FadeIn>
 
           <FadeIn delay={0.5}>
             <p className="mt-8 mb-3 flex items-center gap-2 font-semibold">
-              <FiZap className="text-cyan-600 dark:text-cyan-400" />
+              <FiZap className="text-cyan-700 dark:text-cyan-400" />
               Currently learning
             </p>
             <ul className="flex flex-wrap gap-2">

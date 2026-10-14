@@ -15,7 +15,7 @@ export default function SocialLinks({ className = "" }) {
   const visibleSocials = socials.filter((social) => social.url);
 
   const linkStyle =
-    "flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:-translate-y-1 hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:text-slate-400 dark:hover:border-cyan-400 dark:hover:text-cyan-400";
+    "flex h-10 w-10 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition hover:-translate-y-1 hover:border-cyan-700 hover:text-cyan-700 dark:border-slate-700 dark:text-slate-400 dark:hover:border-cyan-400 dark:hover:text-cyan-400";
 
   return (
     <ul className={`flex gap-4 ${className}`}>

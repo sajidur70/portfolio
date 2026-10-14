@@ -26,7 +26,7 @@ export default function Navbar() {
         {/* Logo: goes back to the top */}
         <a href="#home" className="text-xl font-bold">
           {firstName}
-          <span className="text-cyan-600 dark:text-cyan-400">.</span>
+          <span className="text-cyan-700 dark:text-cyan-400">.</span>
         </a>
 
         {/* Desktop: hidden on small screens, shown from md (768px) */}
@@ -36,7 +36,7 @@ export default function Navbar() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-sm font-medium text-slate-600 transition-colors hover:text-cyan-600 dark:text-slate-300 dark:hover:text-cyan-400"
+                  className="text-sm font-medium text-slate-600 transition-colors hover:text-cyan-700 dark:text-slate-300 dark:hover:text-cyan-400"
                 >
                   {link.label}
                 </a>
@@ -50,7 +50,7 @@ export default function Navbar() {
               href={personal.resumeUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-cyan-600 px-4 py-1.5 text-sm font-medium text-cyan-600 transition-colors hover:bg-cyan-600 hover:text-white dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-400 dark:hover:text-slate-950"
+              className="rounded-full border border-cyan-700 px-4 py-1.5 text-sm font-medium text-cyan-700 transition-colors hover:bg-cyan-700 hover:text-white dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-400 dark:hover:text-slate-950"
             >
               Resume
             </a>
@@ -102,7 +102,7 @@ export default function Navbar() {
                 href={personal.resumeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block rounded-md px-3 py-2 font-medium text-cyan-600 dark:text-cyan-400"
+                className="block rounded-md px-3 py-2 font-medium text-cyan-700 dark:text-cyan-400"
               >
                 Resume
               </a>

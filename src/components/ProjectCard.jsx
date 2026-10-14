@@ -44,7 +44,7 @@ export default function ProjectCard({ project }) {
           {tech.map((name) => (
             <li
               key={name}
-              className="rounded-full bg-cyan-600/10 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+              className="rounded-full bg-cyan-700/10 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
             >
               {name}
             </li>
@@ -58,7 +58,7 @@ export default function ProjectCard({ project }) {
               href={liveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+              className="flex items-center gap-2 rounded-full bg-cyan-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-800 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
             >
               <FiExternalLink aria-hidden="true" />
               Live Demo
@@ -69,7 +69,7 @@ export default function ProjectCard({ project }) {
               href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400"
+              className="flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:border-cyan-700 hover:text-cyan-700 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400"
             >
               <FiGithub aria-hidden="true" />
               Code

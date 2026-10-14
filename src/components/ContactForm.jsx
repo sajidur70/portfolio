@@ -10,7 +10,7 @@ const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
 
 // Same style for all inputs
 const inputStyle =
-  "w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 dark:border-slate-700 dark:bg-slate-800 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/20";
+  "w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-cyan-700 focus:ring-2 focus:ring-cyan-600/20 dark:border-slate-700 dark:bg-slate-800 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/20";
 
 // Contact form: sends the message to my Gmail with Web3Forms (no backend needed).
 export default function ContactForm() {
@@ -54,7 +54,7 @@ export default function ContactForm() {
         The contact form is not set up yet. Please email me at{" "}
         <a
           href={`mailto:${personal.email}`}
-          className="font-medium text-cyan-600 dark:text-cyan-400"
+          className="font-medium text-cyan-700 dark:text-cyan-400"
         >
           {personal.email}
         </a>
@@ -127,7 +127,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={status === "sending"}
-        className="flex w-full items-center justify-center gap-2 rounded-full bg-cyan-600 px-6 py-3 font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-cyan-700 px-6 py-3 font-medium text-white transition hover:bg-cyan-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
       >
         <FiSend aria-hidden="true" />
         {status === "sending" ? "Sending..." : "Send Message"}

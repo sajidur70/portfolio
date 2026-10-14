@@ -2,7 +2,7 @@
 export default function SectionHeading({ number, title, subtitle }) {
   return (
     <div className="mb-12 text-center">
-      <p className="font-mono text-sm text-cyan-600 dark:text-cyan-400">
+      <p className="font-mono text-sm text-cyan-700 dark:text-cyan-400">
         {number}.
       </p>
       <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{title}</h2>

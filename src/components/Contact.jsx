@@ -52,7 +52,7 @@ export default function Contact() {
               const Icon = item.icon;
               return (
                 <li key={item.label} className="flex items-center gap-4">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-600/10 text-cyan-600 dark:bg-cyan-400/10 dark:text-cyan-400">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-700/10 text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-400">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">
@@ -62,7 +62,7 @@ export default function Contact() {
                     {item.href ? (
                       <a
                         href={item.href}
-                        className="font-medium wrap-break-word transition-colors hover:text-cyan-600 dark:hover:text-cyan-400"
+                        className="font-medium wrap-break-word transition-colors hover:text-cyan-700 dark:hover:text-cyan-400"
                       >
                         {item.value}
                       </a>

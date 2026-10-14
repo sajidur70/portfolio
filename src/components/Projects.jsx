@@ -27,7 +27,7 @@ export default function Projects() {
           <FadeIn delay={0.1}>
             <div className="mx-auto max-w-2xl rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
               <FiTool
-                className="mx-auto h-10 w-10 text-cyan-600 dark:text-cyan-400"
+                className="mx-auto h-10 w-10 text-cyan-700 dark:text-cyan-400"
                 aria-hidden="true"
               />
               <h3 className="mt-4 text-xl font-bold">
@@ -42,7 +42,7 @@ export default function Projects() {
                   href={github.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-cyan-600 px-5 py-2.5 font-medium text-white transition hover:scale-105 hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-cyan-700 px-5 py-2.5 font-medium text-white transition hover:scale-105 hover:bg-cyan-800 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
                 >
                   <FiGithub aria-hidden="true" />
                   See my GitHub
@@ -73,7 +73,7 @@ export default function Projects() {
                     {project.tech.map((name) => (
                       <li
                         key={name}
-                        className="rounded-full bg-cyan-600/10 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                        className="rounded-full bg-cyan-700/10 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
                       >
                         {name}
                       </li>
