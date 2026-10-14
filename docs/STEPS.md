@@ -31,10 +31,10 @@
 | | 18 | Projects + ProjectCard ("Currently building" for now) | ✅ |
 | | 19 | Contact form (Web3Forms) | 🔄 |
 | | 20 | Footer | ✅ |
-| **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
+| **4. Polish and launch** | 21 | Mobile check + reduced motion | ✅ reduced motion · ⬜ my phone check |
 | | 22 | SEO: favicon ✅, social preview image ✅ | ✅ |
 | | 23 | README for recruiters | ✅ |
-| | 24 | Lighthouse + final checks → share my link | ⬜ |
+| | 24 | Lighthouse + final checks → share my link | ✅ Lighthouse · ⬜ share |
 
 **Things I need to prepare (Claude tells me when):** LinkedIn URL ✅ · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key ✅ (in `.env.local` + Vercel)
 
@@ -3324,6 +3324,99 @@ import { Analytics } from "@vercel/analytics/next";
 3. **Tech stack** in a table
 4. **How to run it locally**, including **environment variables** (names only, never real secrets!)
 5. **Project structure**, so a reader knows where things are
+
+---
+
+### Step 24: Lighthouse check + fixes ✅
+
+**What is Lighthouse?** Google's free tool that tests a website and scores it **0–100** in 4 categories: **Performance** (speed), **Accessibility** (usable by everyone), **Best Practices** (security, modern code) and **SEO** (search engines). 90+ = green = good.
+I can run it myself: Chrome → `F12` → **Lighthouse** tab → **Analyze page load**. Or online at https://pagespeed.web.dev
+
+> ✅ **15 Oct: Claude ran Lighthouse on my live site** (I asked: "do the rest"), as a **phone** (slow 4G + 4× slower CPU, simulated) and as a **desktop**, fixed the problems, deployed, and ran it again.
+
+#### Results
+
+| | Performance | Accessibility | Best Practices | SEO |
+|---|---|---|---|---|
+| 📱 Mobile **before** | 93 | 96 | 100 | 100 |
+| 📱 Mobile **after** | **90–93** (varies per run) | **100** ✅ | 100 | 100 |
+| 💻 Desktop **before** | 100 | 96 | 100 | 100 |
+| 💻 Desktop **after** | **100** | **100** ✅ | **100** | **100** |
+
+Mobile **LCP** (Largest Contentful Paint = when the biggest text/image appears): **2.8s → 2.4s**. Desktop LCP: **0.6s**. Layout shift: **0** (nothing jumps while loading).
+
+#### Fix 1: Color contrast (Accessibility 96 → 100)
+
+**Problem:** in **light mode**, cyan text (`text-cyan-600`, e.g. "Hi, my name is") on white, and white text on the cyan **View Projects** button, had a contrast of **3.6 : 1**. The rule (WCAG) for normal text is at least **4.5 : 1**, so people with weak eyesight (or a phone in the sun) can read it.
+**Fix:** one shade darker in **light mode only**, everywhere (11 files):
+- `text-cyan-600` → `text-cyan-700`, `bg-cyan-600` → `bg-cyan-700`, `border-cyan-600` → `border-cyan-700`
+- button hover `hover:bg-cyan-700` → `hover:bg-cyan-800`
+- Dark mode (`dark:...-cyan-400`) didn't change: it already had good contrast.
+
+**Rule for the future:** in light mode, use **700** shades for colored text on white (cyan, blue, emerald...). 600 is often too light.
+
+#### Fix 2: Hero appears faster (mobile LCP 2.8s → 2.4s)
+
+**Problem:** the Hero text used `FadeIn` (Motion = JavaScript). It starts **invisible** (`opacity: 0`) and only appears after React and Motion have loaded. On a slow phone, my intro text appeared after 2.8s.
+**Fix:** the Hero now uses a **pure CSS animation**, which starts at the first paint, without waiting for JavaScript. The other sections still use Motion (they're further down the page, so it doesn't matter).
+
+`src/app/globals.css`:
+
+```css
+/* "animate-fade-up" class: fade in + slide up, in pure CSS.
+   Used in the Hero so it shows right away, without waiting for JavaScript. */
+@theme {
+  --animate-fade-up: fade-up 0.6s ease-out both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+```
+
+`src/components/Hero.jsx` (`FadeIn` replaced by `Reveal` everywhere in the Hero):
+
+```js
+function Reveal({ delay = 0, children }) {
+  return (
+    <div
+      className="animate-fade-up motion-reduce:animate-none"
+      style={{ animationDelay: `${delay}s` }}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `@keyframes fade-up` | A CSS animation: from invisible + 24px lower → visible + normal place |
+| `--animate-fade-up` in `@theme` | Tailwind v4: creates the class **`animate-fade-up`** |
+| `ease-out` | Fast at the start, slow at the end (feels natural) |
+| `both` | Keep the "from" state **before** the animation starts (during the delay), and the "to" state after |
+| `style={{ animationDelay: ... }}` | Each part starts a bit later (stagger), like before |
+| `motion-reduce:animate-none` | No animation if the visitor asked for less motion |
+| No `"use client"` | `Reveal` is a Server Component, with zero JavaScript in the browser |
+
+#### What I didn't change (and why)
+
+| Lighthouse note | Why I left it |
+|---|---|
+| "Reduce unused JavaScript" (~80 KB, mobile) | Mostly React, Next.js and Motion. Needed for the animations and the theme toggle |
+| "Legacy JavaScript" (~14 KB) | Small, comes from Next.js's build settings |
+| "Improve image delivery" (~14 KB) | My photo is already ~18 KB WebP. 14 KB isn't worth it |
+| "Efficient cache policy" (1 file) | It's Vercel's analytics script, not my code |
+| Mobile Performance 90–93 instead of 100 | The simulated slow phone needs time to start React. 90+ is green. Getting 100 would mean removing animations |
+
+**Interview line:** *"My portfolio scores 100 on Accessibility, Best Practices and SEO, and 90+ on mobile Performance. Lighthouse flagged low contrast, so I darkened my light-mode accent, and I switched the hero animation from JavaScript to pure CSS to improve Largest Contentful Paint."*
 
 ---
 
