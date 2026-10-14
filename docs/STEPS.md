@@ -22,7 +22,7 @@
 | **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | ✅ |
 | | 10 | `layout.js`: font, page title/SEO, dark colors | ✅ |
 | | 11 | **Light / dark mode toggle** (added 15 Oct) | ✅ |
-| | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ⬜ |
+| | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ✅ |
 | **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ⬜ |
 | | 14 | Hero (name, title, buttons, socials) | ⬜ |
 | | 15 | 3D scene in Hero (Spline) | ⬜ |
@@ -805,6 +805,154 @@ git push
 ```
 
 `git status` should list: `package.json`, `package-lock.json`, `globals.css`, `layout.js`, `page.js` and the new `src/components/` folder.
+
+---
+
+### Step 12: Reusable pieces: `SectionHeading` + `FadeIn` ✅
+
+**Why:** Every section (About, Skills, Projects, Contact) needs a heading and a scroll animation.
+I write them **once** as components and reuse them everywhere. This is the main idea of React: **build small pieces, reuse them**.
+
+> Claude tested this exact code in my project first (then removed it so I can type it): ESLint ✅, build ✅.
+> ✅ **15 Oct: Claude did all of Step 12** (I asked): created `ui/SectionHeading.jsx` + `ui/FadeIn.jsx`, updated `page.js`, ESLint ✅, build ✅, committed and pushed.
+> ⬜ My part: run `npm run dev`, scroll down to see the fade-in, read both components and the tables below so I can explain them.
+
+**My accent color:** **cyan** (`cyan-600` in light mode, `cyan-400` in dark mode). I use it for small highlights only.
+
+#### 12.1 Create the `ui` folder
+
+Right-click `src/components` → **New Folder** → `ui`
+
+(`ui` = small building blocks used by many sections.)
+
+#### 12.2 `SectionHeading.jsx`
+
+Right-click `ui` → **New File** → `SectionHeading.jsx`:
+
+```js
+// The same heading style for every section, e.g. "01. About Me".
+export default function SectionHeading({ number, title, subtitle }) {
+  return (
+    <div className="mb-12 text-center">
+      <p className="font-mono text-sm text-cyan-600 dark:text-cyan-400">
+        {number}.
+      </p>
+      <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{title}</h2>
+      {/* Only show the subtitle if I pass one */}
+      {subtitle && (
+        <p className="mt-3 text-slate-600 dark:text-slate-400">{subtitle}</p>
+      )}
+      <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-linear-to-r from-cyan-500 to-blue-500" />
+    </div>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `function SectionHeading({ number, title, subtitle })` | **Props** with **destructuring**: the component receives `number`, `title`, `subtitle` from whoever uses it |
+| `{subtitle && ( ... )}` | **Conditional rendering**: show the `<p>` only if `subtitle` has a value |
+| `<h2>` | Section titles are `h2`. Only my name (Hero) is `h1`. Good for SEO |
+| `sm:text-4xl` | **Responsive**: bigger text on screens ≥ 640px |
+| `font-mono` | Monospace font (Geist Mono) for the number, a "code" look |
+| `bg-linear-to-r from-cyan-500 to-blue-500` | A gradient line from cyan to blue (Tailwind v4 name; v3 called it `bg-gradient-to-r`) |
+| No `"use client"` | It only shows content, so it stays a **Server Component** (less JavaScript sent to the browser) |
+
+#### 12.3 `FadeIn.jsx`
+
+Right-click `ui` → **New File** → `FadeIn.jsx`:
+
+```js
+"use client";
+
+import { motion } from "motion/react";
+
+// Wraps any content and fades it in when it scrolls into view.
+export default function FadeIn({ children, delay = 0 }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }} // start: invisible, 40px lower
+      whileInView={{ opacity: 1, y: 0 }} // end: visible, normal position
+      viewport={{ once: true, amount: 0.2 }} // run once, when 20% is visible
+      transition={{ duration: 0.6, delay }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `"use client"` | Animations run in the browser, so this is a Client Component |
+| `motion.div` | A normal `<div>` that Motion can animate |
+| `{ children }` | Whatever I put **between** `<FadeIn>` and `</FadeIn>` |
+| `delay = 0` | **Default value**: if I don't pass `delay`, it is `0` |
+| `initial` → `whileInView` | Animate from invisible + 40px lower → visible + normal place, when it scrolls into view |
+| `viewport={{ once: true }}` | Animate only the first time, not every time I scroll past |
+
+**Big idea:** `FadeIn` is a Client Component, but I can use it **inside Server Components** and put server content inside it (`children`). So only the small animation part runs in the browser.
+
+#### 12.4 Test both on the page
+
+Replace `src/app/page.js` with:
+
+```js
+import { personal } from "@/data/portfolio";
+import ThemeToggle from "@/components/ThemeToggle";
+import SectionHeading from "@/components/ui/SectionHeading";
+import FadeIn from "@/components/ui/FadeIn";
+
+// The home page. Real sections (Hero, About, Skills...) come in the next steps.
+export default function Home() {
+  return (
+    <main>
+      <section className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <h1 className="text-4xl font-bold">{personal.name}</h1>
+        <p className="text-lg text-slate-600 dark:text-slate-400">
+          {personal.title} · Portfolio coming soon
+        </p>
+        {/* Temporary place. In Step 13 it moves into the Navbar */}
+        <ThemeToggle />
+      </section>
+
+      {/* Test section: scroll down to see the fade-in. Step 16 replaces it with the real About */}
+      <section id="about" className="mx-auto max-w-5xl px-6 py-24">
+        <FadeIn>
+          <SectionHeading
+            number="01"
+            title="About Me"
+            subtitle="Who I am and what I do"
+          />
+        </FadeIn>
+      </section>
+    </main>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `<SectionHeading number="01" title="About Me" ... />` | **Using** the component and **passing props** |
+| `<FadeIn> ... </FadeIn>` | Everything inside becomes `children` and fades in |
+| `id="about"` | The Navbar link `#about` will scroll here (Step 13) |
+| `mx-auto max-w-5xl px-6 py-24` | Center the section, max width, padding on the sides and top/bottom |
+
+#### 12.5 Check
+
+1. `npm run dev` → http://localhost:3000
+2. **Scroll down** → "01. About Me" **fades in and slides up** ✅
+3. Click the theme button → the heading looks good in **light and dark** mode
+4. **Try it yourself:** change `subtitle` to something else, or remove the `subtitle="..."` line → the subtitle line disappears (conditional rendering!)
+
+#### 12.6 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add SectionHeading and FadeIn components"
+git push
+```
 
 ---
 
