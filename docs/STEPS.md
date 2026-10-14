@@ -3093,6 +3093,93 @@ export default async function OpengraphImage() {
 2. Or test it at https://www.opengraph.xyz → paste my link
 3. LinkedIn caches previews. If LinkedIn shows an old preview, use https://www.linkedin.com/post-inspector/ → paste my link → **Inspect** (it refreshes the cache)
 
+#### 22.3 sitemap.xml + robots.txt (for Google) ✅
+
+> ✅ **15 Oct: Claude made both** (I asked for "item 4"). ESLint ✅, build ✅ (both are static ○), output checked ✅. Committed and pushed.
+> Live: https://sajidur-rahman.vercel.app/robots.txt and https://sajidur-rahman.vercel.app/sitemap.xml
+
+**Why:** Search engines send **robots** (crawlers) that visit websites and add them to search results.
+- **`robots.txt`** = the **rules** for those robots: "you may visit everything, and here is my sitemap"
+- **`sitemap.xml`** = a **list of my pages** for search engines, so they don't have to guess
+- Together they help Google find and index my site, so searching *"Sajidur Rahman developer"* can show my portfolio
+
+**`src/app/robots.js`**
+
+```js
+import { personal } from "@/data/portfolio";
+
+// Creates /robots.txt: tells search engines (Google, Bing...) what they may crawl,
+// and where my sitemap is.
+export default function robots() {
+  return {
+    rules: {
+      userAgent: "*", // all search engines
+      allow: "/", // may visit every page
+    },
+    sitemap: `${personal.siteUrl}/sitemap.xml`,
+  };
+}
+```
+
+Result at `/robots.txt`:
+
+```
+User-Agent: *
+Allow: /
+
+Sitemap: https://sajidur-rahman.vercel.app/sitemap.xml
+```
+
+**`src/app/sitemap.js`**
+
+```js
+import { personal } from "@/data/portfolio";
+
+// Creates /sitemap.xml: a list of my site's pages for search engines.
+// My portfolio is one page (sections like #about are parts of it, not pages),
+// so the list has one URL. Add more objects here if I add pages later.
+export default function sitemap() {
+  return [
+    {
+      url: personal.siteUrl,
+      changeFrequency: "monthly", // how often the page usually changes
+      priority: 1, // most important page (scale 0.0 – 1.0)
+    },
+  ];
+}
+```
+
+Result at `/sitemap.xml`:
+
+```xml
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://sajidur-rahman.vercel.app</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1</priority>
+  </url>
+</urlset>
+```
+
+| Code / word | Meaning |
+|---|---|
+| File names `robots.js` / `sitemap.js` in `src/app/` | **File convention** (like `icon.js`): Next.js turns them into `/robots.txt` and `/sitemap.xml` |
+| I return a **JavaScript object/array** | Next.js converts it to the correct text / XML format for me |
+| `userAgent: "*"` | The rules apply to **all** crawlers (`*` = everyone) |
+| `allow: "/"` | Crawlers may visit **everything** from the root `/` |
+| `sitemap: ...` | Tells crawlers where my sitemap is |
+| `url: personal.siteUrl` | My page URL, from the data file (one place to change it) |
+| Only **one** URL | My site is **one page**. `#about`, `#skills`... are parts of that page, not separate pages, so they don't go in a sitemap |
+| `changeFrequency: "monthly"` | A hint: how often the page changes |
+| `priority: 1` | A hint: how important this page is compared to my other pages (0.0 – 1.0) |
+| No `lastModified: new Date()` | The Next.js docs example uses it, but Next.js 16 with Cache Components rejects `new Date()` in static files (same as the Footer, Step 20). It's optional, so I left it out |
+
+**Optional next step (my part, 10 min): Google Search Console**
+1. https://search.google.com/search-console → **Add property** → **URL prefix** → `https://sajidur-rahman.vercel.app`
+2. Verify with the **HTML tag** method → send the tag to Claude (it goes in `layout.js` metadata)
+3. **Sitemaps** → enter `sitemap.xml` → **Submit**
+4. After a few days, I can see when my site appears in Google search and for which words
+
 ---
 
 ### Step 23: README for recruiters ✅
