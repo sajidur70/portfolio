@@ -23,7 +23,7 @@
 | | 10 | `layout.js`: font, page title/SEO, dark colors | ✅ |
 | | 11 | **Light / dark mode toggle** (added 15 Oct) | ✅ |
 | | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ✅ |
-| **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ⬜ |
+| **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ✅ |
 | | 14 | Hero (name, title, buttons, socials) | ⬜ |
 | | 15 | 3D scene in Hero (Spline) | ⬜ |
 | | 16 | About (photo + bio) | ⬜ |
@@ -951,6 +951,234 @@ export default function Home() {
 git status
 git add .
 git commit -m "Add SectionHeading and FadeIn components"
+git push
+```
+
+---
+
+### Step 13: Navbar (sticky + mobile menu + theme toggle) ✅
+
+**Why:** The Navbar stays at the top while scrolling. Visitors jump to any section with one click.
+On phones, the links hide behind a ☰ **menu button**. My theme toggle moves here from the middle of the page.
+
+> Claude tested this exact code in my project first (then removed it so I can type it): ESLint ✅, build ✅, the page renders the menu button, links and theme toggle ✅.
+> ✅ **15 Oct: Claude did 13.1 → 13.4** (I asked): created `Navbar.jsx`, updated `page.js`, ESLint ✅, build ✅, committed and pushed.
+> ⬜ My part: test it in the browser (13.3: scrolling, links, phone view with `Ctrl + Shift + M`) and read the code + table so I can explain it.
+
+**What it has:**
+- **Logo** "Sajidur." (my first name from the data file) → back to the top (`#home`)
+- **Links:** About · Skills · Projects · Contact → scroll to `#about`, `#skills`...
+- **Resume** button → only shows when `personal.resumeUrl` is not empty (hidden for now)
+- **Theme toggle**
+- **Phones (< 768px):** ☰ button opens a menu, ✕ closes it. Clicking a link also closes it.
+- **See-through blurred background** (`bg-white/70 backdrop-blur-md`), so content shows softly behind it while scrolling
+
+#### 13.1 Create `src/components/Navbar.jsx`
+
+Right-click `src/components` → **New File** → `Navbar.jsx`:
+
+```js
+"use client";
+
+import { useState } from "react";
+import { FiMenu, FiX } from "react-icons/fi";
+import { personal } from "@/data/portfolio";
+import ThemeToggle from "@/components/ThemeToggle";
+
+// Links to each section. href="#about" scrolls to the element with id="about".
+const links = [
+  { label: "About", href: "#about" },
+  { label: "Skills", href: "#skills" },
+  { label: "Projects", href: "#projects" },
+  { label: "Contact", href: "#contact" },
+];
+
+export default function Navbar() {
+  // Is the mobile menu open? Starts closed (false).
+  const [isOpen, setIsOpen] = useState(false);
+
+  // First name for the logo: "Sajidur Rahman" → "Sajidur"
+  const firstName = personal.name.split(" ")[0];
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/70 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/70">
+      <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+        {/* Logo: goes back to the top */}
+        <a href="#home" className="text-xl font-bold">
+          {firstName}
+          <span className="text-cyan-600 dark:text-cyan-400">.</span>
+        </a>
+
+        {/* Desktop: hidden on small screens, shown from md (768px) */}
+        <div className="hidden items-center gap-8 md:flex">
+          <ul className="flex gap-8">
+            {links.map((link) => (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  className="text-sm font-medium text-slate-600 transition-colors hover:text-cyan-600 dark:text-slate-300 dark:hover:text-cyan-400"
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          {/* Resume button: only shown when resumeUrl is not empty */}
+          {personal.resumeUrl && (
+            <a
+              href={personal.resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-cyan-600 px-4 py-1.5 text-sm font-medium text-cyan-600 transition-colors hover:bg-cyan-600 hover:text-white dark:border-cyan-400 dark:text-cyan-400 dark:hover:bg-cyan-400 dark:hover:text-slate-950"
+            >
+              Resume
+            </a>
+          )}
+
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile: theme button + menu button, hidden from md (768px) */}
+        <div className="flex items-center gap-3 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
+            className="rounded-md p-2 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            {isOpen ? (
+              <FiX className="h-6 w-6" />
+            ) : (
+              <FiMenu className="h-6 w-6" />
+            )}
+          </button>
+        </div>
+      </nav>
+
+      {/* Mobile menu: only shown when isOpen is true */}
+      {isOpen && (
+        <ul
+          id="mobile-menu"
+          className="space-y-1 border-t border-slate-200 px-6 py-4 md:hidden dark:border-slate-800"
+        >
+          {links.map((link) => (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                onClick={() => setIsOpen(false)} // close the menu after a click
+                className="block rounded-md px-3 py-2 font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+          {personal.resumeUrl && (
+            <li>
+              <a
+                href={personal.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-md px-3 py-2 font-medium text-cyan-600 dark:text-cyan-400"
+              >
+                Resume
+              </a>
+            </li>
+          )}
+        </ul>
+      )}
+    </header>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `"use client"` | The menu button uses `useState` and `onClick`, so this runs in the browser |
+| `const links = [ ... ]` | An array of links. I loop over it with `.map()` instead of writing 4 `<a>` tags by hand |
+| `useState(false)` | **State**: a value React remembers. `isOpen` = is the menu open? `setIsOpen` changes it, and React re-draws the component |
+| `personal.name.split(" ")[0]` | `split(" ")` cuts the text at spaces → `["Sajidur", "Rahman"]`. `[0]` takes the first item |
+| `links.map((link) => ( <li key={link.href}> ... ))` | Make one `<li>` per link. **`key`** must be unique, so React can track each item |
+| `fixed inset-x-0 top-0 z-50` | Stick to the top, full width, above everything else (`z-50`) |
+| `bg-white/70` | White with **70% opacity** (see-through). `/70` works with any color |
+| `backdrop-blur-md` | Blur what's behind the navbar |
+| `hidden md:flex` | **Hidden on phones**, shown from 768px (desktop links) |
+| `md:hidden` | **Shown on phones**, hidden from 768px (☰ button and mobile menu) |
+| `setIsOpen((open) => !open)` | Flip the value: `true` → `false`, `false` → `true`. Using the previous value `open` is the safe way to update state |
+| `{isOpen ? <FiX /> : <FiMenu />}` | Ternary: show ✕ when open, ☰ when closed |
+| `{isOpen && ( <ul> ... </ul> )}` | Show the mobile menu only when `isOpen` is `true` |
+| `onClick={() => setIsOpen(false)}` | Close the menu after clicking a link |
+| `aria-label`, `aria-expanded`, `aria-controls` | **Accessibility**: tell screen readers what the button does and whether the menu is open |
+| `target="_blank" rel="noopener noreferrer"` | Open the resume in a new tab, safely |
+
+#### 13.2 Update `src/app/page.js`
+
+The Navbar goes at the top. The hero section gets `id="home"` (the logo link scrolls there). `<ThemeToggle />` is removed from the page, because it's in the Navbar now.
+
+```js
+import { personal } from "@/data/portfolio";
+import Navbar from "@/components/Navbar";
+import SectionHeading from "@/components/ui/SectionHeading";
+import FadeIn from "@/components/ui/FadeIn";
+
+// The home page. Real sections (Hero, About, Skills...) come in the next steps.
+export default function Home() {
+  return (
+    <>
+      <Navbar />
+      <main>
+        <section
+          id="home"
+          className="flex min-h-screen flex-col items-center justify-center gap-4"
+        >
+          <h1 className="text-4xl font-bold">{personal.name}</h1>
+          <p className="text-lg text-slate-600 dark:text-slate-400">
+            {personal.title} · Portfolio coming soon
+          </p>
+        </section>
+
+        {/* Test section: scroll down to see the fade-in. Step 16 replaces it with the real About */}
+        <section id="about" className="mx-auto max-w-5xl px-6 py-24">
+          <FadeIn>
+            <SectionHeading
+              number="01"
+              title="About Me"
+              subtitle="Who I am and what I do"
+            />
+          </FadeIn>
+        </section>
+      </main>
+    </>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `<> ... </>` | A **Fragment**: groups `<Navbar />` and `<main>` without adding an extra `<div>` (a component must return **one** parent) |
+| `id="home"` | The logo link `#home` scrolls here |
+
+#### 13.3 Check
+
+1. `npm run dev` → http://localhost:3000
+2. The Navbar is at the top. Scroll down → it **stays** at the top, and the content shows blurred behind it
+3. Click **About** → it scrolls smoothly to "01. About Me". Click the logo → back to the top
+   (Skills, Projects and Contact don't work yet. Those sections come in Steps 17–19)
+4. **Phone test:** press `F12` → click the 📱 **device toolbar** icon (or `Ctrl + Shift + M`) → choose a phone, e.g. iPhone 12
+   - The links are hidden, the ☰ button shows
+   - Click ☰ → the menu opens, the icon becomes ✕
+   - Click **About** → it scrolls, and the menu closes
+5. Theme toggle works on desktop and phone
+
+#### 13.4 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add Navbar with mobile menu and theme toggle"
 git push
 ```
 
