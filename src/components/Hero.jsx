@@ -131,24 +131,38 @@ export default function Hero() {
           <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
             {/* Soft glowing gradient behind the photo */}
             <div className="absolute inset-0 animate-pulse rounded-full bg-linear-to-br from-cyan-400 to-blue-600 opacity-30 blur-3xl" />
-            {/* Gradient ring: a gradient circle with padding, the photo sits inside */}
-            <div className="relative h-56 w-56 rounded-full bg-linear-to-br from-cyan-400 to-blue-600 p-1 sm:h-72 sm:w-72">
-              {personal.photo ? (
-                <Image
-                  src={personal.photo}
-                  alt={`Photo of ${personal.name}`}
-                  width={500}
-                  height={500}
-                  priority
-                  sizes="(min-width: 640px) 288px, 224px"
-                  className="h-full w-full rounded-full object-cover"
-                />
-              ) : (
-                // No photo yet → show my initials
-                <div className="flex h-full w-full items-center justify-center rounded-full bg-white font-mono text-5xl font-bold text-cyan-700 dark:bg-slate-900 dark:text-cyan-400">
-                  {initials}
-                </div>
-              )}
+            {/* group: lets children react when this wrapper is hovered (group-hover:).
+                Hover: the photo tilts a little and a "Hello!" chat bubble pops in */}
+            <div className="group relative cursor-pointer transition-transform duration-200 hover:-rotate-2 hover:scale-105">
+              {/* Gradient ring: a gradient circle with padding, the photo sits inside */}
+              <div className="relative h-56 w-56 rounded-full bg-linear-to-br from-cyan-400 to-blue-600 p-1 sm:h-72 sm:w-72">
+                {personal.photo ? (
+                  <Image
+                    src={personal.photo}
+                    alt={`Photo of ${personal.name}`}
+                    width={500}
+                    height={500}
+                    priority
+                    sizes="(min-width: 640px) 288px, 224px"
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                ) : (
+                  // No photo yet → show my initials
+                  <div className="flex h-full w-full items-center justify-center rounded-full bg-white font-mono text-5xl font-bold text-cyan-700 dark:bg-slate-900 dark:text-cyan-400">
+                    {initials}
+                  </div>
+                )}
+              </div>
+
+              {/* Chat bubble: rounded box, with a sharp bottom-left corner (rounded-bl-sm)
+                  like a message tail pointing at me. scale-0 = hidden until hover.
+                  origin-bottom-left = it grows out of that corner */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-2 -right-6 z-10 origin-bottom-left scale-0 rounded-2xl rounded-bl-sm bg-cyan-700 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform duration-200 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] group-hover:scale-100 dark:bg-cyan-400 dark:text-slate-950"
+              >
+                Hello! 👋
+              </span>
             </div>
           </div>
         </HeroScene>

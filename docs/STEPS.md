@@ -3471,6 +3471,25 @@ A bar at the bottom-left (dark mode only) lets visitors choose 1 of 6 dark backg
 | `hidden sm:inline` on the names | Phones show only the color circles, so the bar stays small |
 | `aria-pressed` | Screen readers announce which palette is selected |
 
+### Extra: "Hello!" chat bubble on photo hover ✅
+
+When you hover over my photo, it tilts a little and a "Hello! 👋" chat bubble pops in at the top-right. On phones, a tap shows it.
+
+I first tried a comic book effect from Uiverse.io (red, yellow frame, halftone dots), but it didn't look professional, so I replaced it with this simple Tailwind version.
+
+Only `src/components/Hero.jsx` changed: a wrapper `<div>` around the photo ring, plus the bubble `<span>`.
+
+| Code | Meaning |
+|---|---|
+| `group` (on the wrapper) | Marks the parent, so children can react when it's hovered |
+| `hover:-rotate-2 hover:scale-105` | On hover: turn 2° left and grow 5% |
+| `scale-0` → `group-hover:scale-100` | The bubble is shrunk to nothing, and grows to full size when the **parent** (`group`) is hovered |
+| `rounded-2xl rounded-bl-sm` | Round corners, except a sharp bottom-left one, like a chat message "tail" pointing at me |
+| `origin-bottom-left` | It grows out of that corner, like it's coming from me |
+| `ease-[cubic-bezier(0.175,0.885,0.32,1.275)]` | A custom curve that goes a bit past 100% and back, a small "spring" |
+| `pointer-events-none` | The bubble can't be clicked, and doesn't block the mouse |
+| `aria-hidden="true"` | Decoration only, screen readers skip it |
+
 ---
 
 ## What I learned
