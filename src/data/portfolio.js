@@ -123,5 +123,41 @@ export const skills = [
 
 // ----- Projects -----
 // Empty for now → the Projects section shows "Currently building".
-// When a project is ready, add an object here (template in docs/PROJECT_GUIDE.md, Section 12.1).
+// When a project is ready, add an object like this (copy, then fill in):
+// {
+//   title: "Task Manager",
+//   description: "One or two lines: the problem it solves and the main features.",
+//   image: "/projects/task-manager.png", // screenshot in public/projects/ ("" = no image)
+//   tech: ["React", "Express", "MongoDB", "JWT"],
+//   liveUrl: "https://task-manager.vercel.app", // "" = hide the button
+//   githubUrl: "https://github.com/sajidur70/task-manager",
+//   featured: true, // shows a "Featured" badge
+// },
 export const projects = [];
+
+// ----- Projects I'm building now -----
+// Shown only while `projects` is empty. Remove one when it moves to `projects`.
+// status: "In progress" | "Planned"
+export const upcomingProjects = [
+  {
+    title: "Task Manager",
+    description:
+      "A Kanban-style task board with sign up / log in (JWT), full CRUD and drag & drop.",
+    tech: ["React", "Express", "MongoDB", "JWT"],
+    status: "In progress",
+  },
+  {
+    title: "Blog Platform",
+    description:
+      "Write, edit and comment on posts, with image upload and protected author routes.",
+    tech: ["React", "Node.js", "MongoDB", "Cloudinary"],
+    status: "Planned",
+  },
+  {
+    title: "E-commerce Store",
+    description:
+      "Products, cart, orders and an admin dashboard, with test payments.",
+    tech: ["Next.js", "Express", "MongoDB", "Stripe"],
+    status: "Planned",
+  },
+];

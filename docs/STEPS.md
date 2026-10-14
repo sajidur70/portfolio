@@ -28,7 +28,7 @@
 | | 15 | Hero image: **my photo** ✅ (3D scene optional, later) | ✅ |
 | | 16 | About (quick info card + my story) | ✅ |
 | | 17 | Skills (cards with icons) + **logo pop-in animation** + **3D title animation** (requested 15 Oct) | ✅ |
-| | 18 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
+| | 18 | Projects + ProjectCard ("Currently building" for now) | ✅ |
 | | 19 | Contact form (Web3Forms) | ⬜ |
 | | 20 | Footer | ⬜ |
 | **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
@@ -42,6 +42,13 @@
 - **Skill logos animate when they appear:** each logo pops in one after another (grows from small + fades in + a little spin) when I scroll to it. On hover, a logo lifts and bounces.
 - **3D animation on the skill titles:** the titles (e.g. Frontend, Backend) flip in with a **3D rotation** (like a card turning toward me) when they appear, and the cards **tilt in 3D** following the mouse.
 - Must respect **reduced motion** and stay fast on phones.
+
+**Ideas to make it more "mine" (for Step 21 polish, optional, 15–30 min each):**
+- A less common accent color (emerald, amber or violet instead of cyan)
+- My motto **"Think BIG, Solve Small"** as a big, bold design line between sections
+- A live LeetCode / GitHub stats card (real proof)
+- An "SR" monogram logo instead of the text "Sajidur."
+- Rule: **projects make me unique, not design**. Don't spend long on these.
 
 **Design rule (from 15 Oct):** the site has **light and dark mode**. Every color I add needs **both**: a light class and a `dark:` class, e.g. `text-slate-600 dark:text-slate-400`.
 
@@ -2134,6 +2141,286 @@ Added `import Skills from "@/components/Skills";` and `<Skills />` after `<About
 4. Light and dark mode: all logos are visible
 5. Phone view: cards are stacked, logos wrap nicely
 6. **Remove skills I can't explain** in `src/data/portfolio.js`
+
+---
+
+### Step 18: Projects + ProjectCard ✅
+
+**Why:** This is the **most important section** for getting hired. My 3 MERN projects aren't ready yet, so for now it shows an **honest "Currently building"** message plus the projects I'm working on. When I add a real project to the data file, the section **switches automatically** to project cards.
+
+> ✅ **15 Oct: Claude built Step 18** (I asked). ESLint ✅, build ✅.
+> Tested **both** states: empty ("Currently building" + 3 upcoming cards) ✅, and with 2 sample projects (screenshot, Featured badge, Live Demo / Code buttons, no-image fallback) ✅. Samples removed. Committed and pushed.
+> ⚠️ **My part:** check the 3 upcoming projects (names, descriptions, tech, status) match what I really plan to build.
+
+**What it shows now (`projects = []`):**
+- A dashed box: 🔧 **"Currently building 3 full-stack MERN projects"** + **See my GitHub** button
+- 3 cards from `upcomingProjects`: **Task Manager** (🟢 In progress), **Blog Platform** (Planned), **E-commerce Store** (Planned), each with a short description and tech tags
+
+**What it shows later (`projects` has items):** a grid of **ProjectCards** (1 column on phones, 2 on tablets, 3 on desktop):
+- 16:9 **screenshot** (zooms a little on hover), or a gradient box with the title if there's no image
+- ⭐ **Featured** badge (when `featured: true`)
+- Title, description, tech tags
+- **Live Demo** and **Code** buttons (each hidden when its url is `""`)
+- The card lifts on hover
+
+#### 18.1 Data in `src/data/portfolio.js`
+
+```js
+// ----- Projects -----
+// Empty for now → the Projects section shows "Currently building".
+// When a project is ready, add an object like this (copy, then fill in):
+// {
+//   title: "Task Manager",
+//   description: "One or two lines: the problem it solves and the main features.",
+//   image: "/projects/task-manager.png", // screenshot in public/projects/ ("" = no image)
+//   tech: ["React", "Express", "MongoDB", "JWT"],
+//   liveUrl: "https://task-manager.vercel.app", // "" = hide the button
+//   githubUrl: "https://github.com/sajidur70/task-manager",
+//   featured: true, // shows a "Featured" badge
+// },
+export const projects = [];
+
+// ----- Projects I'm building now -----
+// Shown only while `projects` is empty. Remove one when it moves to `projects`.
+// status: "In progress" | "Planned"
+export const upcomingProjects = [
+  {
+    title: "Task Manager",
+    description:
+      "A Kanban-style task board with sign up / log in (JWT), full CRUD and drag & drop.",
+    tech: ["React", "Express", "MongoDB", "JWT"],
+    status: "In progress",
+  },
+  {
+    title: "Blog Platform",
+    description:
+      "Write, edit and comment on posts, with image upload and protected author routes.",
+    tech: ["React", "Node.js", "MongoDB", "Cloudinary"],
+    status: "Planned",
+  },
+  {
+    title: "E-commerce Store",
+    description:
+      "Products, cart, orders and an admin dashboard, with test payments.",
+    tech: ["Next.js", "Express", "MongoDB", "Stripe"],
+    status: "Planned",
+  },
+];
+```
+
+#### 18.2 `src/components/ProjectCard.jsx` (new)
+
+```js
+import Image from "next/image";
+import { FiExternalLink, FiGithub, FiStar } from "react-icons/fi";
+
+// One project: screenshot, title, description, tech tags, Live + GitHub buttons.
+export default function ProjectCard({ project }) {
+  const { title, description, image, tech, liveUrl, githubUrl, featured } =
+    project;
+
+  return (
+    // "group": children can react when the whole card is hovered (group-hover:)
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-cyan-500/10 dark:border-slate-800 dark:bg-slate-900">
+      {/* Screenshot (16:9). No image → a gradient box with the title */}
+      <div className="relative aspect-video overflow-hidden bg-linear-to-br from-cyan-500 to-blue-600">
+        {image ? (
+          <Image
+            src={image}
+            alt={`Screenshot of ${title}`}
+            fill
+            sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center p-4 text-center text-2xl font-bold text-white">
+            {title}
+          </div>
+        )}
+
+        {featured && (
+          <span className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-semibold text-slate-900 shadow">
+            <FiStar className="h-3 w-3" aria-hidden="true" />
+            Featured
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-1 flex-col p-6">
+        <h3 className="text-xl font-bold">{title}</h3>
+        <p className="mt-2 flex-1 text-slate-600 dark:text-slate-400">
+          {description}
+        </p>
+
+        {/* Tech tags */}
+        <ul className="mt-4 flex flex-wrap gap-2">
+          {tech.map((name) => (
+            <li
+              key={name}
+              className="rounded-full bg-cyan-600/10 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+
+        {/* Buttons. Each one only shows when its url is not empty */}
+        <div className="mt-6 flex gap-3">
+          {liveUrl && (
+            <a
+              href={liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-full bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+            >
+              <FiExternalLink aria-hidden="true" />
+              Live Demo
+            </a>
+          )}
+          {githubUrl && (
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400"
+            >
+              <FiGithub aria-hidden="true" />
+              Code
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
+  );
+}
+```
+
+#### 18.3 `src/components/Projects.jsx` (new)
+
+```js
+import { FiGithub, FiTool } from "react-icons/fi";
+import { projects, socials, upcomingProjects } from "@/data/portfolio";
+import FadeIn from "@/components/ui/FadeIn";
+import SectionHeading from "@/components/ui/SectionHeading";
+import ProjectCard from "@/components/ProjectCard";
+
+// Projects section.
+// No projects yet → "Currently building" + the projects I'm working on.
+// Projects added → a grid of ProjectCards.
+export default function Projects() {
+  // My GitHub link from the socials list
+  const github = socials.find((social) => social.name === "GitHub");
+
+  return (
+    <section id="projects" className="mx-auto max-w-5xl px-6 py-24">
+      <FadeIn>
+        <SectionHeading
+          number="03"
+          title="Projects"
+          subtitle="Things I've built (and what I'm building now)"
+        />
+      </FadeIn>
+
+      {projects.length === 0 ? (
+        <>
+          {/* Empty state: honest "currently building" message */}
+          <FadeIn delay={0.1}>
+            <div className="mx-auto max-w-2xl rounded-2xl border border-dashed border-slate-300 p-8 text-center dark:border-slate-700">
+              <FiTool
+                className="mx-auto h-10 w-10 text-cyan-600 dark:text-cyan-400"
+                aria-hidden="true"
+              />
+              <h3 className="mt-4 text-xl font-bold">
+                Currently building 3 full-stack MERN projects
+              </h3>
+              <p className="mt-2 text-slate-600 dark:text-slate-400">
+                They will appear here when they&apos;re live. Follow my progress
+                on GitHub.
+              </p>
+              {github && (
+                <a
+                  href={github.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-cyan-600 px-5 py-2.5 font-medium text-white transition hover:scale-105 hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+                >
+                  <FiGithub aria-hidden="true" />
+                  See my GitHub
+                </a>
+              )}
+            </div>
+          </FadeIn>
+
+          {/* What I'm building: simple cards with a status badge */}
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {upcomingProjects.map((project, index) => (
+              <FadeIn key={project.title} delay={0.1 * (index + 1)}>
+                <article className="h-full rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                      project.status === "In progress"
+                        ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                        : "bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                    }`}
+                  >
+                    {project.status}
+                  </span>
+                  <h3 className="mt-4 text-lg font-bold">{project.title}</h3>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    {project.description}
+                  </p>
+                  <ul className="mt-4 flex flex-wrap gap-2">
+                    {project.tech.map((name) => (
+                      <li
+                        key={name}
+                        className="rounded-full bg-cyan-600/10 px-2.5 py-1 text-xs font-medium text-cyan-700 dark:bg-cyan-400/10 dark:text-cyan-300"
+                      >
+                        {name}
+                      </li>
+                    ))}
+                  </ul>
+                </article>
+              </FadeIn>
+            ))}
+          </div>
+        </>
+      ) : (
+        // Real projects: 1 column on phones, 2 on tablets, 3 on desktops
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {projects.map((project, index) => (
+            <FadeIn key={project.title} delay={0.1 * index}>
+              <ProjectCard project={project} />
+            </FadeIn>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `projects.length === 0 ? ( ... ) : ( ... )` | **Ternary** to choose: empty state OR the project grid |
+| `socials.find((social) => social.name === "GitHub")` | `.find()` returns the **first** item that matches (or `undefined`) |
+| `const { title, description, ... } = project;` | **Object destructuring**: take several values out of an object in one line |
+| `className="group ..."` + `group-hover:scale-105` | When the **whole card** (`group`) is hovered, the image zooms |
+| `<Image fill sizes="..." />` | `fill` = the image fills its parent box (the parent needs `relative` + a size, here `aspect-video` = 16:9) |
+| `` className={`... ${project.status === "In progress" ? "green..." : "gray..."}`} `` | Choose classes with a ternary inside a template string: green for "In progress", gray for "Planned" |
+| `&apos;` | An apostrophe ( ' ) in JSX text (ESLint wants it escaped) |
+| `<article>` | The right HTML tag for a self-contained item like a project card |
+| `bg-cyan-600/10` | Cyan at **10% opacity**: a soft tag background |
+
+#### 18.4 `src/app/page.js`
+
+Added `import Projects from "@/components/Projects";` and `<Projects />` after `<Skills />`.
+
+#### 18.5 How to add a real project later (5 minutes)
+
+1. Screenshot the project (16:9, e.g. 1280×720) → save as `public/projects/task-manager.png`
+2. In `src/data/portfolio.js`: copy the example from the comment above `projects`, paste it **inside** `projects = [ ... ]`, fill it in
+3. Remove that project from `upcomingProjects`
+4. `npm run dev` → check → `git add .` → `git commit -m "Add Task Manager project"` → `git push`
 
 ---
 
