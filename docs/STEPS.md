@@ -30,7 +30,7 @@
 | | 17 | Skills (cards with icons) + **logo pop-in animation** + **3D title animation** (requested 15 Oct) | ✅ |
 | | 18 | Projects + ProjectCard ("Currently building" for now) | ✅ |
 | | 19 | Contact form (Web3Forms) | 🔄 |
-| | 20 | Footer | ⬜ |
+| | 20 | Footer | ✅ |
 | **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
 | | 22 | SEO: favicon, social preview image | ⬜ |
 | | 23 | README for recruiters | ⬜ |
@@ -2430,7 +2430,10 @@ Added `import Projects from "@/components/Projects";` and `<Projects />` after `
 
 > ✅ **15 Oct: Claude built Step 19** (I asked). I signed up at Web3Forms (it needs a free account now) and gave Claude my access key.
 > ESLint ✅, build ✅, the form renders ✅, the key is read from `.env.local` ✅, `.env.local` is NOT committed ✅. Committed locally.
-> ⬜ **My part:** 19.4 test locally (send myself a message) · 19.5 add the key in **Vercel** · then Claude pushes.
+> ✅ **19.5 done:** I added `NEXT_PUBLIC_WEB3FORMS_KEY` in Vercel (Settings → **Environment Variables**, type **Config**, not "Environments" which only has Name/Description).
+> I didn't need Vercel's "Redeploy" button: Claude pushed `ba42db5`, and that new deploy included the key. The live site shows the real form ✅.
+> ⬜ **My part:** send a test message on the live site and check Gmail (19.6).
+> Lesson: **Config** = normal setting (value visible later). **Secret** = real secrets like a MongoDB password or JWT secret (never `NEXT_PUBLIC_`).
 
 **What it has:**
 - **Left:** "Let's work together" text, **Email** + **Phone** (clickable) + **Location**, social icons
@@ -2749,6 +2752,82 @@ https://sajidur-rahman.vercel.app → **Contact** → send a test message → it
 
 ---
 
+### Step 20: Footer ✅
+
+**Why:** Every professional site ends with a footer: who owns it, how to reach me, and a quick way back to the top.
+
+> ✅ **15 Oct: Claude built Step 20** (I asked). ESLint ✅, build ✅, renders "© 2026 Sajidur Rahman" ✅. Committed and pushed.
+> 🐛 First build **failed**: Next.js 16 (with **Cache Components**) doesn't allow `new Date()` directly while building a static page. Fixed with `"use cache"` (see the table). Added to "Problems I hit".
+
+**What it has:** © year + my name · "Built with Next.js, Tailwind CSS and Motion. Deployed on Vercel." · my social icons (reused `SocialLinks`) · **Back to top ↑** link (`#home`).
+Phones: stacked and centered. Desktop: one row (left / middle / right).
+
+#### 20.1 `src/components/Footer.jsx` (new)
+
+```js
+import { FiArrowUp } from "react-icons/fi";
+import { personal } from "@/data/portfolio";
+import SocialLinks from "@/components/ui/SocialLinks";
+
+// Next.js 16 doesn't allow `new Date()` directly while building a static page
+// (the value could change). "use cache" = compute it once at build time and reuse it.
+// Every new deploy builds again, so the year stays correct.
+async function getCurrentYear() {
+  "use cache";
+  return new Date().getFullYear();
+}
+
+// Footer: copyright, social icons and a "back to top" link.
+export default async function Footer() {
+  const year = await getCurrentYear();
+
+  return (
+    <footer className="border-t border-slate-200 dark:border-slate-800">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 py-10 md:flex-row md:justify-between">
+        <div className="text-center md:text-left">
+          <p className="font-medium">
+            © {year} {personal.name}
+          </p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Built with Next.js, Tailwind CSS and Motion. Deployed on Vercel.
+          </p>
+        </div>
+
+        <SocialLinks />
+
+        <a
+          href="#home"
+          className="flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-cyan-600 dark:text-slate-400 dark:hover:text-cyan-400"
+        >
+          Back to top
+          <FiArrowUp aria-hidden="true" />
+        </a>
+      </div>
+    </footer>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `<footer>` | The right HTML tag for the bottom of a page |
+| `new Date().getFullYear()` | The current year, e.g. `2026` |
+| `async function getCurrentYear() { "use cache"; ... }` | **`"use cache"`**: Next.js runs this function **once at build time** and saves the result. Without it, Next.js 16 stops the build, because the date could be different on every page load |
+| `export default async function Footer()` + `await getCurrentYear()` | A Server Component can be **`async`** and `await` data before it renders |
+| `<SocialLinks />` | Reused from the Hero. One component, used in 3 places (Hero, Contact, Footer) |
+| `href="#home"` | Scrolls back to the Hero (`id="home"`) |
+
+#### 20.2 `src/app/page.js`
+
+Added `import Footer from "@/components/Footer";` and `<Footer />` **after** `</main>` (the footer is not part of the main content).
+
+#### 20.3 Check
+
+1. Scroll to the bottom → footer with © 2026, icons and **Back to top ↑**
+2. Click **Back to top** → smooth scroll to the Hero
+
+---
+
 ## What I learned
 
 | Date | Concept | In my own words |
@@ -2762,4 +2841,5 @@ https://sajidur-rahman.vercel.app → **Contact** → send a test message → it
 | Date | Problem / error | Fix |
 |---|---|---|
 | 14 Oct | `npx : File C:\Program Files\nodejs\npx.ps1 cannot be loaded because running scripts is disabled on this system` | Windows PowerShell blocks script files (`.ps1`) by default, and `npx` runs as a `.ps1` script. Run once: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then close and reopen the terminal. **RemoteSigned** = my own scripts can run; scripts downloaded from the internet must be signed. **CurrentUser** = only my Windows account, no admin needed |
+| 15 Oct | Build error: `Route "/": Next.js encountered the unstable value new Date() while prerendering` (Footer year) | Next.js 16 with Cache Components doesn't allow `new Date()` directly in a static page. Put it in a function with `"use cache"` (computed once at build time) and make the component `async` |
 | | | |
