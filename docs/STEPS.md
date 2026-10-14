@@ -3490,6 +3490,36 @@ Only `src/components/Hero.jsx` changed: a wrapper `<div>` around the photo ring,
 | `pointer-events-none` | The bubble can't be clicked, and doesn't block the mouse |
 | `aria-hidden="true"` | Decoration only, screen readers skip it |
 
+### Extra: Hero effects (Glow, Bounce, Flip) ✅
+
+Under my photo: **"Tap to try an effect"** with buttons **None · Glow · Bounce · Flip**. Each effect animates my name, my title and my photo together. All the animations are pure CSS.
+
+| Effect | Name | Title | Photo |
+|---|---|---|---|
+| Glow | Pulsing cyan glow | Glows | Ring glows |
+| Bounce | Letters jump one by one | Pops bigger and back | Floats up and down |
+| Flip | Letters flip in 3D one by one | Flips over (top to bottom) | Spins like a coin |
+
+| File | What changed |
+|---|---|
+| `src/components/EffectPicker.jsx` (new) | The buttons. A tap sets `<body data-fx="glow">` (etc.) |
+| `src/components/Hero.jsx` | My name split into letters, class names for CSS, `<EffectPicker />` under the photo |
+| `src/app/globals.css` | One set of rules per effect + their `@keyframes` |
+
+| Code | Meaning |
+|---|---|
+| `body[data-fx="glow"] .hero-name { animation: ... }` | Only animate my name when the Glow effect is on. Same idea as the palettes (`data-bg`) |
+| `[...word].map(...)` | Splits a word into letters, so each letter can be its own `<span>` |
+| `style={{ "--i": i }}` | A CSS variable with the letter's position (0, 1, 2…) |
+| `animation-delay: calc(var(--i) * 0.1s)` | Letter 0 starts at 0s, letter 1 at 0.1s… so they move one after another (a "stagger") |
+| `aria-label={personal.name}` on `<h1>` | Screen readers say "Sajidur Rahman", not "S, a, j, i…" |
+| `inline-block` on each letter | `transform` (move, rotate) doesn't work on normal inline text |
+| `perspective(600px) rotateY(360deg)` | A 3D turn around a vertical line (like a door). `perspective` = how far the "camera" is; without it, it just looks squashed |
+| `rotateX` | A 3D turn around a horizontal line (like a garage door) |
+| `removeAttribute` → `getBoundingClientRect()` → `setAttribute` | Tapping the same effect again restarts it: the browser has to "notice" the removal first |
+| `@media (prefers-reduced-motion: no-preference)` | Only animate if the visitor didn't ask their device for less motion |
+| `motion-reduce:hidden` | ...and hide the buttons for those visitors |
+
 ---
 
 ## What I learned

@@ -74,6 +74,83 @@ html {
     linear-gradient(160deg, oklch(14.5% 0 0) 0%, oklch(27% 0.006 286) 100%);
 }
 
+/* ===== Hero effects =====
+   EffectPicker sets <body data-fx="glow"> etc. Each effect animates
+   my name (.hero-name, each letter = .hero-letter), my title (.hero-title)
+   and my photo ring (.hero-photo). Only if the visitor allows motion. */
+@media (prefers-reduced-motion: no-preference) {
+  /* Glow: soft pulsing cyan light */
+  body[data-fx="glow"] .hero-name {
+    animation: fx-glow-text 2s ease-in-out infinite;
+  }
+  body[data-fx="glow"] .hero-title {
+    animation: fx-glow-drop 2s ease-in-out infinite;
+  }
+  body[data-fx="glow"] .hero-photo {
+    animation: fx-glow-ring 2s ease-in-out infinite;
+  }
+
+  /* Bounce: letters jump one by one, title pops, photo floats */
+  body[data-fx="bounce"] .hero-letter {
+    animation: fx-jump 2s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.1s);
+  }
+  body[data-fx="bounce"] .hero-title {
+    animation: fx-pop 2s ease-in-out infinite;
+  }
+  body[data-fx="bounce"] .hero-photo {
+    animation: fx-float 3s ease-in-out infinite;
+  }
+
+  /* Flip: letters flip in 3D one by one, then the title, photo spins like a coin */
+  body[data-fx="flip"] .hero-letter {
+    animation: fx-flip-y 3s ease-in-out infinite;
+    animation-delay: calc(var(--i) * 0.08s);
+  }
+  body[data-fx="flip"] .hero-title {
+    animation: fx-flip-x 3s ease-in-out infinite 1.1s;
+  }
+  body[data-fx="flip"] .hero-photo {
+    animation: fx-flip-y 3s ease-in-out infinite 0.4s;
+  }
+}
+
+@keyframes fx-glow-text {
+  0%, 100% { text-shadow: 0 0 4px rgb(34 211 238 / 0.3); }
+  50% { text-shadow: 0 0 12px rgb(34 211 238 / 0.9), 0 0 32px rgb(34 211 238 / 0.6); }
+}
+@keyframes fx-glow-drop {
+  0%, 100% { filter: drop-shadow(0 0 2px rgb(34 211 238 / 0.3)); }
+  50% { filter: drop-shadow(0 0 10px rgb(34 211 238 / 0.9)); }
+}
+@keyframes fx-glow-ring {
+  0%, 100% { box-shadow: 0 0 10px rgb(34 211 238 / 0.4); }
+  50% { box-shadow: 0 0 40px 8px rgb(34 211 238 / 0.8); }
+}
+@keyframes fx-jump {
+  0%, 30%, 100% { transform: translateY(0); }
+  15% { transform: translateY(-0.35em); }
+}
+@keyframes fx-pop {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes fx-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+/* perspective(...) = how far away the "camera" is, so the turn looks 3D.
+   Flip in the first 30% of the time, then rest. 360deg looks the same as 0deg,
+   so the jump back at the end of each loop is invisible. */
+@keyframes fx-flip-y {
+  0% { transform: perspective(600px) rotateY(0); }
+  30%, 100% { transform: perspective(600px) rotateY(360deg); }
+}
+@keyframes fx-flip-x {
+  0% { transform: perspective(600px) rotateX(0); }
+  30%, 100% { transform: perspective(600px) rotateX(360deg); }
+}
+
 /* So the sticky navbar doesn't cover section titles after scrolling */
 section {
   scroll-margin-top: 80px;

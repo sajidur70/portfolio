@@ -1,8 +1,10 @@
+import { Fragment } from "react";
 import Image from "next/image";
 import { FiBookOpen, FiCode, FiMapPin } from "react-icons/fi";
 import { personal, highlights } from "@/data/portfolio";
 import SocialLinks from "@/components/ui/SocialLinks";
 import HeroScene from "@/components/HeroScene";
+import EffectPicker from "@/components/EffectPicker";
 
 // Which icon to show for each highlight in the data file
 const highlightIcons = {
@@ -37,6 +39,13 @@ export default function Hero() {
     .map((word) => word[0])
     .join("");
 
+  // My name split into letters, so effects (like bounce) can move each letter.
+  // "Sajidur Rahman" → [[{S,0},{a,1},...], [{R,7},...]]. i = position, for the delay.
+  let letterIndex = 0;
+  const nameWords = personal.name
+    .split(" ")
+    .map((word) => [...word].map((letter) => ({ letter, i: letterIndex++ })));
+
   return (
     <section
       id="home"
@@ -61,14 +70,34 @@ export default function Hero() {
           <p className="mt-6 font-mono text-cyan-700 dark:text-cyan-400">
             Hi, my name is
           </p>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-6xl">
-            {personal.name}
+          {/* aria-label: screen readers read the full name, not letter by letter */}
+          <h1
+            aria-label={personal.name}
+            className="hero-name mt-2 text-4xl font-bold tracking-tight sm:text-6xl"
+          >
+            {nameWords.map((word, w) => (
+              <Fragment key={w}>
+                {w > 0 && " "}
+                {/* whitespace-nowrap: a word never breaks in the middle */}
+                <span className="inline-block whitespace-nowrap">
+                  {word.map(({ letter, i }) => (
+                    <span
+                      key={i}
+                      className="hero-letter inline-block"
+                      style={{ "--i": i }}
+                    >
+                      {letter}
+                    </span>
+                  ))}
+                </span>
+              </Fragment>
+            ))}
           </h1>
         </Reveal>
 
         <Reveal delay={0.2}>
           {/* Gradient text: a gradient background, clipped to the letters */}
-          <p className="mt-3 bg-linear-to-r from-cyan-600 to-blue-600 bg-clip-text text-2xl font-semibold text-transparent sm:text-3xl dark:from-cyan-400 dark:to-blue-400">
+          <p className="hero-title mt-3 bg-linear-to-r from-cyan-600 to-blue-600 bg-clip-text text-2xl font-semibold text-transparent sm:text-3xl dark:from-cyan-400 dark:to-blue-400">
             {personal.title}
           </p>
         </Reveal>
@@ -125,47 +154,51 @@ export default function Hero() {
       </div>
 
       {/* Right: 3D scene on desktop (when heroScene has a URL).
-          Fallback = my photo (phones, loading, no scene) */}
+          Fallback = my photo (phones, loading, no scene).
+          Below it: buttons to try different effects on my name, title and photo */}
       <Reveal delay={0.3}>
-        <HeroScene sceneUrl={personal.heroScene}>
-          <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
-            {/* Soft glowing gradient behind the photo */}
-            <div className="absolute inset-0 animate-pulse rounded-full bg-linear-to-br from-cyan-400 to-blue-600 opacity-30 blur-3xl" />
-            {/* group: lets children react when this wrapper is hovered (group-hover:).
-                Hover: the photo tilts a little and a "Hello!" chat bubble pops in */}
-            <div className="group relative cursor-pointer transition-transform duration-200 hover:-rotate-2 hover:scale-105">
-              {/* Gradient ring: a gradient circle with padding, the photo sits inside */}
-              <div className="relative h-56 w-56 rounded-full bg-linear-to-br from-cyan-400 to-blue-600 p-1 sm:h-72 sm:w-72">
-                {personal.photo ? (
-                  <Image
-                    src={personal.photo}
-                    alt={`Photo of ${personal.name}`}
-                    width={500}
-                    height={500}
-                    priority
-                    sizes="(min-width: 640px) 288px, 224px"
-                    className="h-full w-full rounded-full object-cover"
-                  />
-                ) : (
-                  // No photo yet → show my initials
-                  <div className="flex h-full w-full items-center justify-center rounded-full bg-white font-mono text-5xl font-bold text-cyan-700 dark:bg-slate-900 dark:text-cyan-400">
-                    {initials}
-                  </div>
-                )}
-              </div>
+        <div className="flex flex-col items-center">
+          <HeroScene sceneUrl={personal.heroScene}>
+            <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
+              {/* Soft glowing gradient behind the photo */}
+              <div className="hero-halo absolute inset-0 animate-pulse rounded-full bg-linear-to-br from-cyan-400 to-blue-600 opacity-30 blur-3xl" />
+              {/* group: lets children react when this wrapper is hovered (group-hover:).
+                  Hover: the photo tilts a little and a "Hello!" chat bubble pops in */}
+              <div className="group relative cursor-pointer transition-transform duration-200 hover:-rotate-2 hover:scale-105">
+                {/* Gradient ring: a gradient circle with padding, the photo sits inside */}
+                <div className="hero-photo relative h-56 w-56 rounded-full bg-linear-to-br from-cyan-400 to-blue-600 p-1 sm:h-72 sm:w-72">
+                  {personal.photo ? (
+                    <Image
+                      src={personal.photo}
+                      alt={`Photo of ${personal.name}`}
+                      width={500}
+                      height={500}
+                      priority
+                      sizes="(min-width: 640px) 288px, 224px"
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  ) : (
+                    // No photo yet → show my initials
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-white font-mono text-5xl font-bold text-cyan-700 dark:bg-slate-900 dark:text-cyan-400">
+                      {initials}
+                    </div>
+                  )}
+                </div>
 
-              {/* Chat bubble: rounded box, with a sharp bottom-left corner (rounded-bl-sm)
-                  like a message tail pointing at me. scale-0 = hidden until hover.
-                  origin-bottom-left = it grows out of that corner */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -top-2 -right-6 z-10 origin-bottom-left scale-0 rounded-2xl rounded-bl-sm bg-cyan-700 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform duration-200 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] group-hover:scale-100 dark:bg-cyan-400 dark:text-slate-950"
-              >
-                Hello! 👋
-              </span>
+                {/* Chat bubble: rounded box, with a sharp bottom-left corner (rounded-bl-sm)
+                    like a message tail pointing at me. scale-0 = hidden until hover.
+                    origin-bottom-left = it grows out of that corner */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -top-2 -right-6 z-10 origin-bottom-left scale-0 rounded-2xl rounded-bl-sm bg-cyan-700 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform duration-200 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] group-hover:scale-100 dark:bg-cyan-400 dark:text-slate-950"
+                >
+                  Hello! 👋
+                </span>
+              </div>
             </div>
-          </div>
-        </HeroScene>
+          </HeroScene>
+          <EffectPicker />
+        </div>
       </Reveal>
     </section>
   );
