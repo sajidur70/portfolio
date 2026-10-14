@@ -76,22 +76,48 @@ export const about = {
 
 // ----- Skills -----
 // Rule: only list skills I can explain in an interview.
+// The logo for each skill is set in src/components/SkillCard.jsx
 export const skills = [
   {
     category: "Frontend",
-    items: ["HTML", "CSS", "JavaScript", "React", "Next.js", "Tailwind CSS"],
+    items: [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Tailwind CSS",
+    ],
   },
   {
-    category: "Backend",
-    items: ["Node.js", "Express.js", "REST APIs", "JWT Auth"],
+    category: "Backend & Database",
+    items: [
+      "Node.js",
+      "Express.js",
+      "REST APIs",
+      "JWT Auth",
+      "MongoDB",
+      "Mongoose",
+      "SQL",
+    ],
   },
   {
-    category: "Database",
-    items: ["MongoDB", "Mongoose"],
+    category: "Tools & DevOps",
+    items: [
+      "Git",
+      "GitHub",
+      "Docker",
+      "GitHub Actions",
+      "Linux",
+      "Postman",
+      "Jest",
+      "Vercel",
+    ],
   },
   {
-    category: "Tools",
-    items: ["Git", "GitHub", "VS Code", "Postman", "Vercel"],
+    category: "Problem Solving",
+    items: ["Data Structures", "Algorithms", "Python", "Java", "C++"],
   },
 ];
 

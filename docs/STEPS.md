@@ -27,7 +27,7 @@
 | | 14 | Hero (name, title, buttons, socials) | ✅ |
 | | 15 | Hero image: **my photo** ✅ (3D scene optional, later) | ✅ |
 | | 16 | About (quick info card + my story) | ✅ |
-| | 17 | Skills (cards with icons) + **logo pop-in animation** + **3D title animation** (requested 15 Oct) | ⬜ |
+| | 17 | Skills (cards with icons) + **logo pop-in animation** + **3D title animation** (requested 15 Oct) | ✅ |
 | | 18 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
 | | 19 | Contact form (Web3Forms) | ⬜ |
 | | 20 | Footer | ⬜ |
@@ -1817,6 +1817,323 @@ git add .
 git commit -m "Add About section"
 git push
 ```
+
+---
+
+### Step 17: Skills (animated logos + 3D titles) ✅
+
+**Why:** Recruiters scan the Skills section to match me with the job ad. Clear groups + recognizable **brand logos** make that fast. The animations I asked for make it memorable.
+
+> ✅ **15 Oct: Claude built Step 17** (I asked). ESLint ✅, build ✅, renders 4 cards ✅, committed and pushed.
+> ⚠️ **My part:** check the skills list. Remove anything I can't explain in an interview (e.g. Docker, GitHub Actions, Linux, Java, C++). I took them from my GitHub profile README and my repos.
+
+**What it does:**
+
+| Effect | How it looks |
+|---|---|
+| **Cards slide in** | Each category card fades in and slides up, one after another |
+| **3D flip-in titles** | Each title (Frontend, Backend & Database...) starts **turned away** (`rotateX: 90°`) and **turns to face me**, like a card flipping up |
+| **Logos pop in** | Each skill logo **grows from 0, fades in and spins** from -45° → 0°, one after another (**stagger**), with a bouncy **spring** |
+| **Hover a logo** | It lifts up and grows (`y: -6, scale: 1.1`) |
+| **3D tilt** | The card **tilts toward my mouse** (max 6°) and smoothly goes back when the mouse leaves |
+| **Reduce motion** | If the visitor turned on "reduce motion": no movement, only fades (`MotionConfig reducedMotion="user"`), and no tilt |
+
+**Categories (4 cards, 2×2 on desktop, stacked on phones):** Frontend · Backend & Database · Tools & DevOps · Problem Solving
+
+#### 17.1 Data: `skills` in `src/data/portfolio.js`
+
+```js
+// ----- Skills -----
+// Rule: only list skills I can explain in an interview.
+// The logo for each skill is set in src/components/SkillCard.jsx
+export const skills = [
+  {
+    category: "Frontend",
+    items: [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Tailwind CSS",
+    ],
+  },
+  {
+    category: "Backend & Database",
+    items: [
+      "Node.js",
+      "Express.js",
+      "REST APIs",
+      "JWT Auth",
+      "MongoDB",
+      "Mongoose",
+      "SQL",
+    ],
+  },
+  {
+    category: "Tools & DevOps",
+    items: [
+      "Git",
+      "GitHub",
+      "Docker",
+      "GitHub Actions",
+      "Linux",
+      "Postman",
+      "Jest",
+      "Vercel",
+    ],
+  },
+  {
+    category: "Problem Solving",
+    items: ["Data Structures", "Algorithms", "Python", "Java", "C++"],
+  },
+];
+```
+
+#### 17.2 `src/components/SkillCard.jsx` (new, Client Component)
+
+```js
+"use client";
+
+import {
+  MotionConfig,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from "motion/react";
+import { FiCode } from "react-icons/fi";
+import { FaJava } from "react-icons/fa";
+import {
+  TbApi,
+  TbBinaryTree,
+  TbDatabase,
+  TbMathFunction,
+} from "react-icons/tb";
+import {
+  SiCplusplus,
+  SiCss,
+  SiDocker,
+  SiExpress,
+  SiGit,
+  SiGithub,
+  SiGithubactions,
+  SiHtml5,
+  SiJavascript,
+  SiJest,
+  SiJsonwebtokens,
+  SiLinux,
+  SiMongodb,
+  SiMongoose,
+  SiNextdotjs,
+  SiNodedotjs,
+  SiPostman,
+  SiPython,
+  SiReact,
+  SiTailwindcss,
+  SiTypescript,
+  SiVercel,
+} from "react-icons/si";
+
+// Logo + brand color for each skill name in the data file.
+// color "" = use the text color (for black logos, so they also show in dark mode)
+const skillIcons = {
+  HTML: { icon: SiHtml5, color: "#E34F26" },
+  CSS: { icon: SiCss, color: "#1572B6" },
+  JavaScript: { icon: SiJavascript, color: "#F7DF1E" },
+  TypeScript: { icon: SiTypescript, color: "#3178C6" },
+  React: { icon: SiReact, color: "#61DAFB" },
+  "Next.js": { icon: SiNextdotjs, color: "" },
+  "Tailwind CSS": { icon: SiTailwindcss, color: "#06B6D4" },
+  "Node.js": { icon: SiNodedotjs, color: "#5FA04E" },
+  "Express.js": { icon: SiExpress, color: "" },
+  "REST APIs": { icon: TbApi, color: "#0EA5E9" },
+  "JWT Auth": { icon: SiJsonwebtokens, color: "#D63AFF" },
+  MongoDB: { icon: SiMongodb, color: "#47A248" },
+  Mongoose: { icon: SiMongoose, color: "#880000" },
+  SQL: { icon: TbDatabase, color: "#336791" },
+  Git: { icon: SiGit, color: "#F05032" },
+  GitHub: { icon: SiGithub, color: "" },
+  Docker: { icon: SiDocker, color: "#2496ED" },
+  "GitHub Actions": { icon: SiGithubactions, color: "#2088FF" },
+  Linux: { icon: SiLinux, color: "#FCC624" },
+  Postman: { icon: SiPostman, color: "#FF6C37" },
+  Jest: { icon: SiJest, color: "#C21325" },
+  Vercel: { icon: SiVercel, color: "" },
+  "Data Structures": { icon: TbBinaryTree, color: "#0891B2" },
+  Algorithms: { icon: TbMathFunction, color: "#7C3AED" },
+  Python: { icon: SiPython, color: "#3776AB" },
+  Java: { icon: FaJava, color: "#E76F00" },
+  "C++": { icon: SiCplusplus, color: "#00599C" },
+};
+
+// Animation for the list: show the children (logos) one after another
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.3 } },
+};
+
+// Animation for each logo: pop in (small → normal), fade in, spin a little
+const itemVariants = {
+  hidden: { opacity: 0, scale: 0, rotate: -45 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    rotate: 0,
+    transition: { type: "spring", stiffness: 260, damping: 15 },
+  },
+};
+
+// One skill category card: 3D flip-in title, pop-in logos, 3D tilt with the mouse.
+export default function SkillCard({ category, items, index }) {
+  const reduceMotion = useReducedMotion();
+
+  // How much the card is tilted (in degrees). useSpring makes it move smoothly.
+  const rotateX = useSpring(useMotionValue(0), { stiffness: 150, damping: 15 });
+  const rotateY = useSpring(useMotionValue(0), { stiffness: 150, damping: 15 });
+
+  // Tilt the card toward the mouse
+  function handleMouseMove(event) {
+    if (reduceMotion) return;
+    const box = event.currentTarget.getBoundingClientRect();
+    // Mouse position inside the card, from -0.5 (left/top) to 0.5 (right/bottom)
+    const x = (event.clientX - box.left) / box.width - 0.5;
+    const y = (event.clientY - box.top) / box.height - 0.5;
+    rotateX.set(-y * 12); // max 6° up/down
+    rotateY.set(x * 12); // max 6° left/right
+  }
+
+  // Mouse left the card → back to flat
+  function handleMouseLeave() {
+    rotateX.set(0);
+    rotateY.set(0);
+  }
+
+  return (
+    // reducedMotion="user": if the visitor asked for less motion, skip movement (keep fades)
+    <MotionConfig reducedMotion="user">
+      <motion.div
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ rotateX, rotateY, transformPerspective: 800 }}
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.6, delay: index * 0.1 }}
+        className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm transition-shadow hover:shadow-xl hover:shadow-cyan-500/10 dark:border-slate-800 dark:bg-slate-900"
+      >
+        {/* 3D flip-in title: starts turned away (rotateX 90°), then turns to face me */}
+        <motion.h3
+          initial={{ opacity: 0, rotateX: 90 }}
+          whileInView={{ opacity: 1, rotateX: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: index * 0.1 + 0.1 }}
+          style={{ transformPerspective: 600, transformOrigin: "bottom" }}
+          className="mb-5 flex items-center gap-2 text-xl font-bold"
+        >
+          <span className="h-6 w-1 rounded-full bg-linear-to-b from-cyan-500 to-blue-500" />
+          {category}
+        </motion.h3>
+
+        {/* Logos: pop in one after another */}
+        <motion.ul
+          variants={listVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="flex flex-wrap gap-3"
+        >
+          {items.map((name) => {
+            const skill = skillIcons[name] ?? { icon: FiCode, color: "" };
+            const Icon = skill.icon;
+            return (
+              <motion.li
+                key={name}
+                variants={itemVariants}
+                whileHover={{ y: -6, scale: 1.1 }}
+                className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium shadow-sm dark:border-slate-700 dark:bg-slate-800"
+              >
+                <Icon
+                  className="h-5 w-5"
+                  style={skill.color ? { color: skill.color } : undefined}
+                  aria-hidden="true"
+                />
+                {name}
+              </motion.li>
+            );
+          })}
+        </motion.ul>
+      </motion.div>
+    </MotionConfig>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `skillIcons = { React: { icon: SiReact, color: "#61DAFB" }, ... }` | Logo + **brand color** for each skill. The data file stays simple (just names) |
+| `color: ""` | For black logos (Next.js, Express, GitHub, Vercel): use the text color, so they're visible in dark mode too |
+| `style={skill.color ? { color: skill.color } : undefined}` | **Inline style**: set the logo color only when there is one |
+| **Variants** (`listVariants`, `itemVariants`) | Named animation states (`"hidden"`, `"visible"`). The parent `<motion.ul>` switches to `"visible"`, and every child `<motion.li>` follows automatically |
+| `staggerChildren: 0.07` | Start each child 0.07s after the one before → one-by-one pop-in |
+| `type: "spring", stiffness, damping` | **Spring physics**: a natural bouncy movement instead of a fixed speed |
+| `initial={{ rotateX: 90 }}` + `transformPerspective` | **3D rotation**: the title starts tilted 90° (flat, invisible), then rotates to 0°. Perspective = how strong the 3D depth looks (smaller number = stronger) |
+| `transformOrigin: "bottom"` | Rotate around the **bottom** edge, like a card standing up |
+| `useMotionValue(0)` + `useSpring(...)` | A value Motion can animate **without re-rendering React**. The spring makes the tilt follow the mouse smoothly |
+| `getBoundingClientRect()` | The card's position and size on the screen |
+| `(event.clientX - box.left) / box.width - 0.5` | Mouse position inside the card: **-0.5** (left edge) → **0.5** (right edge) |
+| `rotateX.set(-y * 12)` | Mouse at the top → tilt back, mouse at the bottom → tilt forward |
+| `useReducedMotion()` | `true` if the visitor's computer asks for less motion → skip the tilt |
+| `aria-hidden="true"` | Screen readers skip the logo (the skill name is right next to it) |
+
+#### 17.3 `src/components/Skills.jsx` (new, Server Component)
+
+```js
+import { skills } from "@/data/portfolio";
+import FadeIn from "@/components/ui/FadeIn";
+import SectionHeading from "@/components/ui/SectionHeading";
+import SkillCard from "@/components/SkillCard";
+
+// Skills section: one animated card per category.
+export default function Skills() {
+  return (
+    <section id="skills" className="mx-auto max-w-5xl px-6 py-24">
+      <FadeIn>
+        <SectionHeading
+          number="02"
+          title="Skills"
+          subtitle="The tools I use to build, test and ship"
+        />
+      </FadeIn>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {skills.map((group, index) => (
+          <SkillCard
+            key={group.category}
+            category={group.category}
+            items={group.items}
+            index={index}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+```
+
+#### 17.4 `src/app/page.js`
+
+Added `import Skills from "@/components/Skills";` and `<Skills />` after `<About />`.
+
+#### 17.5 Check (my part)
+
+1. `npm run dev` → click **Skills** in the Navbar
+2. The titles **flip up in 3D**, the logos **pop in one by one**
+3. Move the mouse over a card → it **tilts in 3D**. Hover a logo → it **lifts**
+4. Light and dark mode: all logos are visible
+5. Phone view: cards are stacked, logos wrap nicely
+6. **Remove skills I can't explain** in `src/data/portfolio.js`
 
 ---
 
