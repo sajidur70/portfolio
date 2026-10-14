@@ -18,7 +18,12 @@ const geistMono = Geist_Mono({
 // SEO: what browsers, Google and LinkedIn show for my site
 export const metadata = {
   metadataBase: new URL(personal.siteUrl),
-  title: `${personal.name} | ${personal.title}`,
+  title: {
+    // Home page title
+    default: `${personal.name} | ${personal.title}`,
+    // Other pages: "Page not found" → "Page not found | Sajidur Rahman"
+    template: `%s | ${personal.name}`,
+  },
   description: `Portfolio of ${personal.name}, a ${personal.title} from ${personal.location}. ${personal.intro}`,
   openGraph: {
     title: `${personal.name} | ${personal.title}`,

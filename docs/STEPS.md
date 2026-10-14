@@ -3185,6 +3185,83 @@ Result at `/sitemap.xml`:
 3. **Sitemaps** → enter `sitemap.xml` → **Submit**
 4. After a few days, I can see when my site appears in Google search and for which words
 
+#### 22.4 Custom 404 page ✅
+
+> ✅ **15 Oct: Claude made it** (I asked for "item 5"). ESLint ✅, build ✅. Tested `/abc`: status **404** ✅, my design ✅, tab title "Page not found | Sajidur Rahman" ✅, `noindex` (Google won't list it) ✅. Committed and pushed.
+
+**Before:** a wrong link (e.g. `/abc`) showed Next.js's plain 404 page. **After:** a big gradient **404**, "Page not found", and 2 buttons: **Back to home** and **Contact me**. Light/dark mode works, because the page renders inside my `layout.js`.
+
+**`src/app/not-found.js`**
+
+```js
+import Link from "next/link";
+import { FiArrowLeft, FiMail } from "react-icons/fi";
+
+// Browser tab title for this page
+export const metadata = {
+  title: "Page not found",
+};
+
+// Custom 404 page: shown for any URL that doesn't exist, e.g. /abc
+export default function NotFound() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      {/* Big gradient "404" */}
+      <p className="bg-linear-to-r from-cyan-600 to-blue-600 bg-clip-text font-mono text-8xl font-bold text-transparent sm:text-9xl dark:from-cyan-400 dark:to-blue-400">
+        404
+      </p>
+
+      <h1 className="mt-6 text-3xl font-bold sm:text-4xl">Page not found</h1>
+      <p className="mt-3 max-w-md text-lg text-slate-600 dark:text-slate-400">
+        This page doesn&apos;t exist or was moved. Let&apos;s get you back on
+        track.
+      </p>
+
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
+        {/* <Link> = Next.js link: goes to another page without a full reload */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-full bg-cyan-600 px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-cyan-700 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+        >
+          <FiArrowLeft aria-hidden="true" />
+          Back to home
+        </Link>
+        <Link
+          href="/#contact"
+          className="flex items-center gap-2 rounded-full border border-slate-300 px-6 py-3 font-medium transition hover:scale-105 hover:border-cyan-600 hover:text-cyan-600 dark:border-slate-700 dark:hover:border-cyan-400 dark:hover:text-cyan-400"
+        >
+          <FiMail aria-hidden="true" />
+          Contact me
+        </Link>
+      </div>
+    </main>
+  );
+}
+```
+
+**`src/app/layout.js`**: title **template**:
+
+```js
+  title: {
+    // Home page title
+    default: `${personal.name} | ${personal.title}`,
+    // Other pages: "Page not found" → "Page not found | Sajidur Rahman"
+    template: `%s | ${personal.name}`,
+  },
+```
+
+| Code | Meaning |
+|---|---|
+| File name `not-found.js` in `src/app/` | **File convention**: Next.js shows it for **any URL that doesn't exist**, and sends the **404 status code** |
+| `export const metadata = { title: "Page not found" }` | Each page can set its own metadata. It's merged with the layout's metadata |
+| `title.template: "%s \| Sajidur Rahman"` | `%s` is replaced by the page's own title → "Page not found \| Sajidur Rahman" |
+| `title.default` | Used when a page doesn't set a title (my home page) |
+| `import Link from "next/link"` / `<Link href="/">` | Next.js link between **pages**: fast, no full page reload. (For `#section` links on the same page, a normal `<a>` is fine, like in my Navbar) |
+| `href="/#contact"` | Go to the home page **and** scroll to the Contact section |
+| `noindex` (added by Next.js) | Tells Google: don't show this page in search results |
+
+**Check:** open https://sajidur-rahman.vercel.app/abc → my 404 page → click **Back to home**.
+
 ---
 
 ### Step 23: README for recruiters ✅
