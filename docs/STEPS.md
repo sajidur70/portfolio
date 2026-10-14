@@ -3447,6 +3447,30 @@ The flat `slate-950` dark background became a gradient. I compared 5 options loc
 | Several backgrounds separated by commas | They stack: the first one is on top |
 | `background-attachment: fixed` | The gradient stays still while the page scrolls |
 
+### Extra: Palette picker for visitors ✅
+
+A bar at the bottom-left (dark mode only) lets visitors choose 1 of 6 dark backgrounds: **Midnight** (default), **Ocean**, **Space**, **Purple**, **Aurora**, **Graphite**. The choice is remembered after a reload.
+
+| File | What it does |
+|---|---|
+| `src/components/PalettePicker.jsx` (new) | The bar. A click sets `<body data-bg="ocean">` and saves the choice in `localStorage` |
+| `src/app/globals.css` | One rule per palette: `.dark body[data-bg="ocean"] { ... }` |
+| `src/app/layout.js` | Shows `<PalettePicker />` on every page |
+| `src/components/Footer.jsx` | `dark:pb-20`: extra bottom space in dark mode, so the bar doesn't cover the footer text |
+| `next.config.mjs` | `devIndicators: { position: "bottom-right" }`: moves the dev-only "N" badge away from the bar |
+
+| Code | Meaning |
+|---|---|
+| `body[data-bg="ocean"]` | CSS attribute selector: only matches when body has `data-bg="ocean"`. It's more specific than `.dark body`, so it wins |
+| `localStorage.setItem("bg-palette", id)` | Saves the choice in the browser, so it's still there after a reload |
+| `try { ... } catch { ... }` | In private mode `localStorage` can throw. The palette still works, it just isn't remembered |
+| `useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)` | React hook to read a value that lives **outside** React (here `localStorage`). The server has no `localStorage`, so the 3rd function returns the default `""` |
+| `window.dispatchEvent(new Event("palette-change"))` | Tells React "the value changed, read it again" |
+| `useEffect(() => { ... }, [active])` | After React renders, put the palette on `<body>`. Changing the page (DOM) belongs in an effect |
+| `hidden dark:flex` | Hidden in light mode, shown in dark mode |
+| `hidden sm:inline` on the names | Phones show only the color circles, so the bar stays small |
+| `aria-pressed` | Screen readers announce which palette is selected |
+
 ---
 
 ## What I learned
@@ -3463,4 +3487,5 @@ The flat `slate-950` dark background became a gradient. I compared 5 options loc
 |---|---|---|
 | 14 Oct | `npx : File C:\Program Files\nodejs\npx.ps1 cannot be loaded because running scripts is disabled on this system` | Windows PowerShell blocks script files (`.ps1`) by default, and `npx` runs as a `.ps1` script. Run once: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`, then close and reopen the terminal. **RemoteSigned** = my own scripts can run; scripts downloaded from the internet must be signed. **CurrentUser** = only my Windows account, no admin needed |
 | 15 Oct | Build error: `Route "/": Next.js encountered the unstable value new Date() while prerendering` (Footer year) | Next.js 16 with Cache Components doesn't allow `new Date()` directly in a static page. Put it in a function with `"use cache"` (computed once at build time) and make the component `async` |
+| 15 Oct | Palette buttons did nothing on localhost: `data-bg` changed on `<body>`, but the background stayed the same | The running dev server kept sending **old CSS** (I had run `npm run build` while `npm run dev` was running, and OneDrive can hide file changes). Fix: Ctrl+C, `Remove-Item -Recurse -Force .next`, `npm run dev`. Also: the first palettes were so dark they all looked the same, so I made the end colors brighter |
 | | | |

@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Analytics } from "@vercel/analytics/next";
 import { personal } from "@/data/portfolio";
+import PalettePicker from "@/components/PalettePicker";
 import "./globals.css";
 
 // Load the Geist font. next/font downloads it at build time,
@@ -46,6 +47,8 @@ export default function RootLayout({ children }) {
       <body className="flex min-h-full flex-col bg-white font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           {children}
+          {/* Bottom-left bar to choose the dark background */}
+          <PalettePicker />
         </ThemeProvider>
         {/* Vercel Web Analytics: counts visitors (no cookies). Only active on Vercel */}
         <Analytics />

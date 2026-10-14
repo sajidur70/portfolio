@@ -16,7 +16,9 @@ export default async function Footer() {
 
   return (
     <footer className="border-t border-slate-200 dark:border-slate-800">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 py-10 md:flex-row md:justify-between">
+      {/* dark:pb-20: extra space at the bottom in dark mode, so the palette bar
+          (fixed at the bottom-left) doesn't cover the footer text */}
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 px-6 py-10 md:flex-row md:justify-between dark:pb-20">
         <div className="text-center md:text-left">
           <p className="font-medium">
             © {year} {personal.name}

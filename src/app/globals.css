@@ -42,6 +42,38 @@ html {
   background-attachment: fixed;
 }
 
+/* Other dark palettes. PalettePicker sets <body data-bg="ocean"> etc.
+   [data-bg="..."] makes these rules more specific, so they win over the default above. */
+.dark body[data-bg="ocean"] {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(34 211 238 / 0.2), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgb(45 212 191 / 0.15), transparent 50%),
+    linear-gradient(160deg, oklch(13% 0.04 265) 0%, oklch(26% 0.07 215) 100%);
+}
+.dark body[data-bg="space"] {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(34 211 238 / 0.12), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgb(99 102 241 / 0.25), transparent 50%),
+    linear-gradient(160deg, oklch(13% 0.04 265) 0%, oklch(25% 0.12 280) 100%);
+}
+.dark body[data-bg="purple"] {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(139 92 246 / 0.25), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgb(236 72 153 / 0.15), transparent 50%),
+    linear-gradient(160deg, oklch(14% 0.005 286) 0%, oklch(26% 0.13 300) 100%);
+}
+.dark body[data-bg="aurora"] {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(52 211 153 / 0.2), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgb(34 211 238 / 0.15), transparent 50%),
+    linear-gradient(160deg, oklch(13% 0.04 265) 0%, oklch(22% 0.06 220) 50%, oklch(24% 0.07 165) 100%);
+}
+.dark body[data-bg="graphite"] {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(255 255 255 / 0.05), transparent 45%),
+    linear-gradient(160deg, oklch(14.5% 0 0) 0%, oklch(27% 0.006 286) 100%);
+}
+
 /* So the sticky navbar doesn't cover section titles after scrolling */
 section {
   scroll-margin-top: 80px;
