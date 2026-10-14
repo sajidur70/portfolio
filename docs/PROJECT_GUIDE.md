@@ -68,6 +68,7 @@ Don't spend more than ~1 week on the portfolio. After that, focus on building pr
 | F11 | Social links (GitHub, LinkedIn, Email) | Contact / Footer |
 | F12 | Resume button that opens the PDF. Hidden or disabled until the resume is added | Hero / Navbar |
 | F13 | Scroll-in animations for sections | All sections |
+| F14 | Light / dark mode toggle that remembers the choice (first visit follows the computer setting) | Navbar |
 
 ### 2.2 Non-functional requirements (how the site must BE)
 
@@ -101,6 +102,7 @@ Don't spend more than ~1 week on the portfolio. After that, focus on building pr
 | 3D | **Spline** (`@splinetool/react-spline`) | Design 3D in the browser, embed with 1 component. No 3D math needed |
 | 3D (advanced, optional) | **React Three Fiber** + **Drei** | Full control with code. Learn later |
 | Icons | **react-icons** | Free icons for tech logos and social links |
+| Light / dark mode | **next-themes** | Adds `class="dark"` to `<html>`, remembers the choice, no flash on page load |
 | Fonts | **next/font** | Loads Google Fonts fast, no layout shift |
 | Contact form | **Web3Forms** | Free, no backend, sends form data to my email |
 | Version control | **Git + GitHub** | Save history, show code to recruiters |

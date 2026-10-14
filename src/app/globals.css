@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode is ON when <html> has class="dark" (next-themes adds it) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Connect the Geist font (loaded in layout.js) to Tailwind's font-sans / font-mono classes */
 @theme inline {
   --font-sans: var(--font-geist-sans);

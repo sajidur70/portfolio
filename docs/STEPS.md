@@ -20,22 +20,25 @@
 | | 7 | Push to GitHub | ✅ |
 | | 8 | Deploy to Vercel (site goes live) | ✅ |
 | **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | ✅ |
-| | 10 | `layout.js`: font, page title/SEO, dark colors | 🔄 |
-| | 11 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ⬜ |
-| **3. Sections** | 12 | Navbar (sticky + mobile menu) | ⬜ |
-| | 13 | Hero (name, title, buttons, socials) | ⬜ |
-| | 14 | 3D scene in Hero (Spline) | ⬜ |
-| | 15 | About (photo + bio) | ⬜ |
-| | 16 | Skills (cards with icons) | ⬜ |
-| | 17 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
-| | 18 | Contact form (Web3Forms) | ⬜ |
-| | 19 | Footer | ⬜ |
-| **4. Polish and launch** | 20 | Mobile check + reduced motion | ⬜ |
-| | 21 | SEO: favicon, social preview image | ⬜ |
-| | 22 | README for recruiters | ⬜ |
-| | 23 | Lighthouse + final checks → share my link | ⬜ |
+| | 10 | `layout.js`: font, page title/SEO, dark colors | ✅ |
+| | 11 | **Light / dark mode toggle** (added 15 Oct) | ✅ |
+| | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ⬜ |
+| **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ⬜ |
+| | 14 | Hero (name, title, buttons, socials) | ⬜ |
+| | 15 | 3D scene in Hero (Spline) | ⬜ |
+| | 16 | About (photo + bio) | ⬜ |
+| | 17 | Skills (cards with icons) | ⬜ |
+| | 18 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
+| | 19 | Contact form (Web3Forms) | ⬜ |
+| | 20 | Footer | ⬜ |
+| **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
+| | 22 | SEO: favicon, social preview image | ⬜ |
+| | 23 | README for recruiters | ⬜ |
+| | 24 | Lighthouse + final checks → share my link | ⬜ |
 
-**Things I need to prepare (Claude tells me when):** LinkedIn URL (Step 9) · Spline account + scene (Step 14) · profile photo (Step 15) · Web3Forms key (Step 18)
+**Things I need to prepare (Claude tells me when):** LinkedIn URL (any time) · Spline account + scene (Step 15) · profile photo (Step 16) · Web3Forms key (Step 19)
+
+**Design rule (from 15 Oct):** the site has **light and dark mode**. Every color I add needs **both**: a light class and a `dark:` class, e.g. `text-slate-600 dark:text-slate-400`.
 
 ---
 
@@ -535,7 +538,10 @@ git push
 
 ---
 
-### Step 10: `layout.js`: page title, SEO and dark colors 🔄
+### Step 10: `layout.js`: page title, SEO and dark colors ✅
+
+> ✅ **15 Oct:** pushed `1524adf Add SEO metadata and dark theme to layout`. Claude checked all 3 files: correct.
+> The fixed dark colors on `<body>` change in Step 11 (light/dark toggle).
 
 **Why:** `layout.js` wraps **every page** of my site. It controls:
 - the text in the **browser tab** (now it says "Create Next App" ❌)
@@ -636,6 +642,169 @@ git add .
 git commit -m "Add SEO metadata and dark theme to layout"
 git push
 ```
+
+---
+
+### Step 11: Light / dark mode toggle ✅
+
+**Why:** Visitors can choose a light or dark background with a ☀️/🌙 button. The site remembers the choice. On the first visit it follows the visitor's computer setting.
+
+**How it works:**
+1. The package **next-themes** adds `class="dark"` to `<html>` when dark mode is on, and saves the choice in the browser (`localStorage`).
+2. Tailwind classes that start with `dark:` only work when `<html>` has `class="dark"`.
+3. So every element gets **two colors**: `bg-white dark:bg-slate-950` → white in light mode, dark in dark mode.
+
+> Claude tested this exact code in a copy of my project first: ESLint ✅, build ✅, the page loads ✅.
+> ✅ **15 Oct:** I did 11.1 (installed next-themes). **Claude did 11.2 → 11.5** (I asked) and checked 11.6: ESLint ✅, build ✅, page has the toggle button and the next-themes script ✅, tab title ✅.
+> ✅ 11.7: Claude committed and pushed (I asked): `Add light and dark mode toggle`.
+> Note: VS Code may show **"Unknown at rule @custom-variant"** in `globals.css`. That's only VS Code's normal CSS checker, which doesn't know Tailwind. The code is fine. The **Tailwind CSS IntelliSense** extension removes the warning.
+
+#### 11.1 Install next-themes
+
+```powershell
+npm install next-themes
+```
+
+#### 11.2 Tell Tailwind to use the `dark` class
+
+In `src/app/globals.css`, add these lines **right under** `@import "tailwindcss";`:
+
+```css
+/* Dark mode is ON when <html> has class="dark" (next-themes adds it) */
+@custom-variant dark (&:where(.dark, .dark *));
+```
+
+| Code | Meaning |
+|---|---|
+| `@custom-variant dark` | Change how Tailwind's `dark:` classes work |
+| `(&:where(.dark, .dark *))` | `dark:` classes apply when the element is inside something with `class="dark"`. Without this, Tailwind follows only the computer setting, and my button can't change it |
+
+#### 11.3 Update `src/app/layout.js` (3 small changes)
+
+**Change 1:** add this import as the **2nd line**:
+
+```js
+import { ThemeProvider } from "next-themes";
+```
+
+**Change 2:** add `suppressHydrationWarning` to `<html>`:
+
+```js
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+```
+
+**Change 3:** replace the whole `<body>...</body>` with:
+
+```js
+      <body className="flex min-h-full flex-col bg-white font-sans text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+      </body>
+```
+
+| Code | Meaning |
+|---|---|
+| `ThemeProvider` | Wraps my whole site so every component can read and change the theme |
+| `attribute="class"` | Put the theme as a **class** on `<html>` (`class="dark"`) |
+| `defaultTheme="system"` + `enableSystem` | First visit: follow the visitor's computer setting |
+| `suppressHydrationWarning` | next-themes changes `<html>` in the browser before React loads. This stops React from warning that the server HTML and the browser HTML are different (only for `<html>`) |
+| `bg-white text-slate-900` | Light mode: white background, dark text |
+| `dark:bg-slate-950 dark:text-slate-100` | Dark mode: dark background, light text |
+| `transition-colors` | The colors fade smoothly when I switch |
+
+#### 11.4 Create the toggle button
+
+1. Right-click `src` → **New Folder** → `components`
+2. Right-click `components` → **New File** → `ThemeToggle.jsx`
+3. Type:
+
+```js
+"use client";
+
+import { useTheme } from "next-themes";
+import { FiMoon, FiSun } from "react-icons/fi";
+
+// A button that switches between light and dark mode.
+export default function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+
+  function toggleTheme() {
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      aria-label="Toggle light and dark mode"
+      className="rounded-full border border-slate-300 p-2 transition-colors hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+    >
+      {/* Light mode shows the moon, dark mode shows the sun */}
+      <FiMoon className="h-5 w-5 dark:hidden" />
+      <FiSun className="hidden h-5 w-5 dark:block" />
+    </button>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `"use client"` | This component runs in the **browser** (it has a click handler). Must be the 1st line |
+| `useTheme()` | A **hook** from next-themes. Gives the current theme and a function to change it |
+| `resolvedTheme` | The theme really shown now: `"light"` or `"dark"` (even when the setting is "system") |
+| `setTheme(...)` | Change the theme. next-themes saves it in `localStorage` |
+| `a ? b : c` | **Ternary**: if `a` is true use `b`, else `c`. Here: if dark → switch to light, else → dark |
+| `onClick={toggleTheme}` | Run `toggleTheme` when the button is clicked (no `()`, I pass the function, I don't call it) |
+| `aria-label` | Screen readers read this, because the button has only an icon and no text |
+| `dark:hidden` / `hidden dark:block` | Show the moon in light mode and the sun in dark mode, using CSS only |
+
+#### 11.5 Show the button on the page (for now)
+
+In `src/app/page.js`:
+
+```js
+import { personal } from "@/data/portfolio";
+import ThemeToggle from "@/components/ThemeToggle";
+
+// The home page. For now it shows my name and title from the data file.
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4">
+      <h1 className="text-4xl font-bold">{personal.name}</h1>
+      <p className="text-lg text-slate-600 dark:text-slate-400">
+        {personal.title} · Portfolio coming soon
+      </p>
+      {/* Temporary place. In Step 13 it moves into the Navbar */}
+      <ThemeToggle />
+    </main>
+  );
+}
+```
+
+Note: `text-slate-400` became `text-slate-600 dark:text-slate-400`. Light gray text is hard to read on white, so light mode uses a darker gray.
+
+#### 11.6 Check
+
+1. `npm run dev` → http://localhost:3000
+2. Click the button → the page switches light ↔ dark. The icon changes 🌙 ↔ ☀️
+3. Refresh the page (`F5`) → my choice is **remembered**
+4. No red errors in the terminal or in the browser console (`F12` → **Console**)
+
+#### 11.7 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add light and dark mode toggle"
+git push
+```
+
+`git status` should list: `package.json`, `package-lock.json`, `globals.css`, `layout.js`, `page.js` and the new `src/components/` folder.
 
 ---
 
