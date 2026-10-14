@@ -11,6 +11,7 @@ export const personal = {
   email: "sajidurrahmansahib@gmail.com",
   photo: "/profile.jpg", // I add this image in Step 15
   resumeUrl: "", // Empty = the Resume button stays hidden. Later: "/resume.pdf"
+  siteUrl: "https://sajidur-rahman.vercel.app", // My live link
 };
 
 // ----- Social links -----

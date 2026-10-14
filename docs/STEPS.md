@@ -19,8 +19,8 @@
 | **1. Setup and deploy** | 1–6 | Terminal, create app, run, packages, clean starter | ✅ |
 | | 7 | Push to GitHub | ✅ |
 | | 8 | Deploy to Vercel (site goes live) | ✅ |
-| **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | 🔄 |
-| | 10 | `layout.js`: font, page title/SEO, dark colors | ⬜ |
+| **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | ✅ |
+| | 10 | `layout.js`: font, page title/SEO, dark colors | 🔄 |
 | | 11 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ⬜ |
 | **3. Sections** | 12 | Navbar (sticky + mobile menu) | ⬜ |
 | | 13 | Hero (name, title, buttons, socials) | ⬜ |
@@ -401,13 +401,14 @@ git push
 
 ## Part 2: Foundation
 
-### Step 9: The data file (all my text in one place) 🔄
+### Step 9: The data file (all my text in one place) ✅
 
 **Why:** My name, bio, skills and links are written **once**, in one file. Every component reads from it.
 To change my site later (new skill, new project, resume), I usually edit **only this file**. In an interview: *"I separated my content from my components."*
 
 > ✅ **15 Oct:** 9.1 + 9.2 done by Claude (I asked): created `src/data/portfolio.js` with the data below. ESLint: no errors.
-> ⬜ My part: read it and change anything that isn't true about me, then do 9.3 → 9.5.
+> ✅ My part done: typed `page.js` (9.3), checked it, pushed commit `98c6057 Add portfolio data file`.
+> ✅ **Claude's review:** `page.js` is correct (`import` + `{personal.name}` + `{personal.title}`). ESLint: no errors. `npm run build`: compiled successfully. The live site shows "MERN Stack Developer" from the data file.
 
 #### 9.1 Create the file
 
@@ -531,6 +532,110 @@ git push
 ```
 
 `git status` must list `src/app/page.js` and `src/data/`. If not, save the files first.
+
+---
+
+### Step 10: `layout.js`: page title, SEO and dark colors 🔄
+
+**Why:** `layout.js` wraps **every page** of my site. It controls:
+- the text in the **browser tab** (now it says "Create Next App" ❌)
+- the **description** Google and LinkedIn show for my site (SEO)
+- the **font** and **colors** for the whole site
+
+#### 10.1 Add my site URL to the data file
+
+In `src/data/portfolio.js`, inside `personal`, add one line after `resumeUrl`:
+
+```js
+  resumeUrl: "", // Empty = the Resume button stays hidden. Later: "/resume.pdf"
+  siteUrl: "https://sajidur-rahman.vercel.app", // My live link
+```
+
+#### 10.2 Replace `src/app/layout.js`
+
+Delete everything and type:
+
+```js
+import { Geist, Geist_Mono } from "next/font/google";
+import { personal } from "@/data/portfolio";
+import "./globals.css";
+
+// Load the Geist font from Google. next/font downloads it at build time,
+// so the browser doesn't wait for Google and the text doesn't "jump".
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+// SEO: what browsers, Google and LinkedIn show for my site
+export const metadata = {
+  metadataBase: new URL(personal.siteUrl),
+  title: `${personal.name} | ${personal.title}`,
+  description: `Portfolio of ${personal.name}, a ${personal.title} from ${personal.location}. ${personal.intro}`,
+  openGraph: {
+    title: `${personal.name} | ${personal.title}`,
+    description: personal.intro,
+    url: "/",
+    siteName: personal.name,
+    type: "website",
+  },
+};
+
+// Wraps every page. {children} = the page content (page.js)
+export default function RootLayout({ children }) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col bg-slate-950 font-sans text-slate-100">
+        {children}
+      </body>
+    </html>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `Geist({ ... })` | Load the Geist font. `variable` gives it a CSS name that `globals.css` connects to Tailwind's `font-sans` |
+| `export const metadata` | Next.js reads this and writes the `<title>` and `<meta>` tags for me |
+| `` `${personal.name} \| ${personal.title}` `` | A **template string** (backticks). `${ }` puts a value inside text → "Sajidur Rahman \| MERN Stack Developer" |
+| `metadataBase` | My live URL. Next.js uses it to build full links for social previews |
+| `openGraph` | What LinkedIn, Facebook and WhatsApp show when I share my link |
+| `{ children }` | **Props**: the page content that `layout.js` wraps |
+| `lang="en"` | Tells browsers and screen readers the page is in English |
+| `bg-slate-950 text-slate-100` on `<body>` | Dark background + light text for the **whole site** |
+| `font-sans` | Use the Geist font |
+
+#### 10.3 Clean `page.js`
+
+The colors now come from `<body>`, so remove `bg-slate-950 text-slate-100` from `<main>` in `src/app/page.js`:
+
+```js
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4">
+```
+
+#### 10.4 Check
+
+1. `npm run dev` → http://localhost:3000
+2. The **browser tab** now says **Sajidur Rahman | MERN Stack Developer** ✅
+3. The page still has a dark background, and the text uses the Geist font.
+4. Right-click the page → **View page source** → press `Ctrl + F` → search `description`. I see my description in a `<meta>` tag.
+
+#### 10.5 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add SEO metadata and dark theme to layout"
+git push
+```
 
 ---
 
