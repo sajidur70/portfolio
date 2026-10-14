@@ -18,8 +18,8 @@
 |---|---|---|---|
 | **1. Setup and deploy** | 1–6 | Terminal, create app, run, packages, clean starter | ✅ |
 | | 7 | Push to GitHub | ✅ |
-| | 8 | Deploy to Vercel (site goes live) | ⬜ |
-| **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | ⬜ |
+| | 8 | Deploy to Vercel (site goes live) | ✅ |
+| **2. Foundation** | 9 | Data file `src/data/portfolio.js` (all my text) | 🔄 |
 | | 10 | `layout.js`: font, page title/SEO, dark colors | ⬜ |
 | | 11 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ⬜ |
 | **3. Sections** | 12 | Navbar (sticky + mobile menu) | ⬜ |
@@ -332,7 +332,7 @@ git push -u origin main
 
 ---
 
-### Step 8: Deploy to Vercel 🔄
+### Step 8: Deploy to Vercel ✅
 
 > ✅ **15 Oct:** 8.1 + 8.2 done. "Congratulations! You just deployed a new project to sajidur70's projects." GitHub shows a **Production** deployment with status **success**.
 > ⚠️ Long URLs like `portfolio-mhmof13p3-sajidur70s-projects.vercel.app` are **protected**: only I can open them (logged in to Vercel). Other people see a Vercel login page.
@@ -389,6 +389,148 @@ git push
 
 **Check:** my live URL opens on my phone too.
 **My live URL:** https://sajidur-rahman.vercel.app ✅
+
+> ✅ **8.4 done (15 Oct):** I pushed commit `2e678de`, and Vercel built a new **Production** deployment by itself. **Auto-deploy works.**
+> I didn't see 🚀 because I forgot to save `page.js` before committing, so only the `docs/` files were in the commit. Skipped the 🚀 test since auto-deploy is already proven.
+> **Lesson:** run `git status` before `git commit`. If my file isn't listed, I didn't save it. (A white dot ● on the file's tab = not saved.)
+> **Lesson:** `portfolio-sajidur70s-projects.vercel.app` is a private Vercel link. It works only for me. My public link is `sajidur-rahman.vercel.app`.
+> ✅ **GitHub repo "About" (15 Oct):** the Website field had the private link. Fixed it (repo page → ⚙️ next to **About** → **Website** → `https://sajidur-rahman.vercel.app` → **Save changes**). Claude checked: correct now.
+> The **Deployments** box on GitHub always shows the long private link. GitHub fills it automatically, so I can't edit it. I can hide it by unchecking **Deployments** in the same ⚙️ window.
+
+---
+
+## Part 2: Foundation
+
+### Step 9: The data file (all my text in one place) 🔄
+
+**Why:** My name, bio, skills and links are written **once**, in one file. Every component reads from it.
+To change my site later (new skill, new project, resume), I usually edit **only this file**. In an interview: *"I separated my content from my components."*
+
+> ✅ **15 Oct:** 9.1 + 9.2 done by Claude (I asked): created `src/data/portfolio.js` with the data below. ESLint: no errors.
+> ⬜ My part: read it and change anything that isn't true about me, then do 9.3 → 9.5.
+
+#### 9.1 Create the file
+
+**Where:** VS Code Explorer (left side)
+
+1. Right-click the `src` folder → **New Folder** → name it `data`
+2. Right-click the new `data` folder → **New File** → name it `portfolio.js`
+
+The path is now `src/data/portfolio.js`.
+
+#### 9.2 Type the data
+
+Type this in `portfolio.js`. **Change the text to be true about me.**
+
+```js
+// ===== ALL MY PORTFOLIO CONTENT =====
+// Components read from this file. To update my site, I edit this file.
+
+// ----- Personal info -----
+export const personal = {
+  name: "Sajidur Rahman",
+  title: "MERN Stack Developer",
+  intro:
+    "I build fast, responsive web apps with MongoDB, Express, React and Node.js.",
+  location: "Bangladesh",
+  email: "sajidurrahmansahib@gmail.com",
+  photo: "/profile.jpg", // I add this image in Step 15
+  resumeUrl: "", // Empty = the Resume button stays hidden. Later: "/resume.pdf"
+};
+
+// ----- Social links -----
+// An empty url ("") is hidden on the site. I fill it in when I have it.
+export const socials = [
+  { name: "GitHub", url: "https://github.com/sajidur70" },
+  { name: "LinkedIn", url: "" },
+];
+
+// ----- About me -----
+export const about = {
+  paragraphs: [
+    "I'm a junior MERN stack developer from Bangladesh who enjoys turning ideas into real web apps.",
+    "I like solving problems, and I practise on Codeforces to sharpen my logic.",
+    "Right now I'm building full-stack projects and I'm looking for my first role as a web developer.",
+  ],
+};
+
+// ----- Skills -----
+// Rule: only list skills I can explain in an interview.
+export const skills = [
+  {
+    category: "Frontend",
+    items: ["HTML", "CSS", "JavaScript", "React", "Next.js", "Tailwind CSS"],
+  },
+  {
+    category: "Backend",
+    items: ["Node.js", "Express.js", "REST APIs", "JWT Auth"],
+  },
+  {
+    category: "Database",
+    items: ["MongoDB", "Mongoose"],
+  },
+  {
+    category: "Tools",
+    items: ["Git", "GitHub", "VS Code", "Postman", "Vercel"],
+  },
+];
+
+// ----- Projects -----
+// Empty for now → the Projects section shows "Currently building".
+// When a project is ready, add an object here (template in PROJECT_GUIDE.md, Section 12.1).
+export const projects = [];
+```
+
+| Code | Meaning |
+|---|---|
+| `export const personal = { ... }` | An **object** (key: value pairs). `export` lets other files import it |
+| `export const socials = [ ... ]` | An **array** (a list). Here, a list of objects |
+| `personal.name` | How a component reads one value from an object |
+| `skills.map(...)` | How a component will loop over an array (Step 16) |
+| `projects = []` | An empty array. `projects.length === 0` → show "Currently building" |
+| `// ...` | A comment. JavaScript ignores it. It's a note for me |
+
+#### 9.3 Use the data in `page.js`
+
+Replace everything in `src/app/page.js` with:
+
+```js
+import { personal } from "@/data/portfolio";
+
+// The home page. For now it shows my name and title from the data file.
+export default function Home() {
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-950 text-slate-100">
+      <h1 className="text-4xl font-bold">{personal.name}</h1>
+      <p className="text-lg text-slate-400">
+        {personal.title} · Portfolio coming soon
+      </p>
+    </main>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `import { personal } from "@/data/portfolio"` | Bring in `personal` from my data file. `@/` = the `src/` folder. No `.js` needed |
+| `{ personal.name }` | Curly braces in JSX = "run JavaScript here". It shows the value, not the words |
+
+#### 9.4 Check
+
+1. `npm run dev` → http://localhost:3000 still shows my name and title.
+2. **Try it yourself:** in `portfolio.js`, change `title` to `"Full Stack Developer"` → save → the page changes. Then change it back.
+   This proves the page reads from the data file.
+
+#### 9.5 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add portfolio data file"
+git push
+```
+
+`git status` must list `src/app/page.js` and `src/data/`. If not, save the files first.
 
 ---
 
