@@ -25,9 +25,9 @@
 | | 12 | Reusable pieces: `SectionHeading` + `FadeIn` animation | ✅ |
 | **3. Sections** | 13 | Navbar (sticky + mobile menu + theme toggle) | ✅ |
 | | 14 | Hero (name, title, buttons, socials) | ✅ |
-| | 15 | 3D scene in Hero (Spline) → **my photo** for now, 3D optional | ✅ |
-| | 16 | About (photo + bio) | ⬜ |
-| | 17 | Skills (cards with icons) | ⬜ |
+| | 15 | Hero image: **my photo** ✅ (3D scene optional, later) | ✅ |
+| | 16 | About (quick info card + my story) | ✅ |
+| | 17 | Skills (cards with icons) + **logo pop-in animation** + **3D title animation** (requested 15 Oct) | ⬜ |
 | | 18 | Projects + ProjectCard ("Currently building" for now) | ⬜ |
 | | 19 | Contact form (Web3Forms) | ⬜ |
 | | 20 | Footer | ⬜ |
@@ -36,7 +36,12 @@
 | | 23 | README for recruiters | ⬜ |
 | | 24 | Lighthouse + final checks → share my link | ⬜ |
 
-**Things I need to prepare (Claude tells me when):** LinkedIn URL (any time) · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key (Step 19)
+**Things I need to prepare (Claude tells me when):** LinkedIn URL ✅ · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key (Step 19)
+
+**Requested for Step 17 – Skills (15 Oct):**
+- **Skill logos animate when they appear:** each logo pops in one after another (grows from small + fades in + a little spin) when I scroll to it. On hover, a logo lifts and bounces.
+- **3D animation on the skill titles:** the titles (e.g. Frontend, Backend) flip in with a **3D rotation** (like a card turning toward me) when they appear, and the cards **tilt in 3D** following the mouse.
+- Must respect **reduced motion** and stay fast on phones.
 
 **Design rule (from 15 Oct):** the site has **light and dark mode**. Every color I add needs **both**: a light class and a `dark:` class, e.g. `text-slate-600 dark:text-slate-400`.
 
@@ -1615,6 +1620,201 @@ export default function HeroScene({ sceneUrl, children }) {
 git status
 git add .
 git commit -m "Add 3D Spline scene to Hero"
+git push
+```
+
+---
+
+### Step 16: About section ✅
+
+**Why:** The Hero says *what* I do. The About section says *who I am* and *how I work*, so a recruiter can picture me in their team.
+
+**Change vs. the first plan:** my photo is already in the Hero, so About doesn't repeat it. Instead, the left side is a **"Quick info" card** (education, location, focus, email, availability), which recruiters can scan in 3 seconds.
+
+> ✅ **15 Oct: Claude wrote Step 16** (text based on my GitHub profile README). ESLint ✅, build ✅, the section renders ✅.
+> ✅ **15 Oct: I checked the text and gave my real details** (from my CV):
+> - Education: **B.Sc. in Computer Science & Engineering, East West University, Dhaka, 2018 – 2024**
+> - Address: **Jessore, Khulna, Bangladesh** · Phone: **+880 1521-319370**
+> Claude updated: `personal.location`, new `personal.phone`, the Hero quick fact (**B.Sc. in CSE, East West University**), the 1st About paragraph, and the Quick info card (Education with a 2nd line, **Email + Phone as clickable links**).
+> New in the code: facts can have `detail` (small 2nd line) and `href` (makes it a link); `.filter((fact) => fact.value)` hides empty facts (e.g. `phone: ""`).
+> ESLint ✅, build ✅, committed and pushed.
+> Note: the code blocks below show the first version. The real code is in `src/data/portfolio.js` and `src/components/About.jsx`.
+
+**Layout:**
+- **Heading:** "01. About Me" (my `SectionHeading` + `FadeIn` from Step 12)
+- **Left:** Quick info card: Education · Location · Focus · Email · 🟢 Open to junior full-stack roles
+- **Right:** 3 short paragraphs → my motto *"Think BIG, Solve Small"* as a quote → **Currently learning** chips (System Design, Databases, Deployment, Caching)
+- **Phones:** card on top, story below. **Desktop:** side by side (card 2/5, story 3/5)
+
+#### 16.1 Data: `about` in `src/data/portfolio.js`
+
+```js
+// ----- About me -----
+export const about = {
+  // My story: who I am → what I build → how I work → what I'm learning
+  paragraphs: [
+    "I'm a Computer Science and Engineering (CSE) graduate from Jessore, Bangladesh, and a full-stack developer who loves turning ideas into working web apps.",
+    "I build with the MERN stack: React on the front end, Node.js and Express for APIs, and MongoDB for data. Solving 500+ LeetCode problems taught me to break big problems into small, clear steps.",
+    "I use AI tools to code faster, debug smarter and learn quickly, and I make sure I understand every line I ship. Right now I'm building full-stack projects and looking for my first developer role.",
+  ],
+  motto:
+    "Think BIG, Solve Small: I explore every possibility, then ship the simplest solution that works.",
+  learning: ["System Design", "Databases", "Deployment", "Caching"],
+  // The "quick info" card. Only true facts!
+  facts: [
+    { label: "Education", value: "CSE Graduate" },
+    { label: "Location", value: personal.location },
+    { label: "Focus", value: "MERN Stack, Full Stack Web Apps" },
+    { label: "Email", value: personal.email },
+  ],
+};
+```
+
+| Code | Meaning |
+|---|---|
+| `paragraphs` | My story: who I am → what I build → how I work / what I want |
+| `motto` | Shown as a quote |
+| `learning` | Shown as small "chips". Honest and good to show: I keep learning |
+| `facts` | The Quick info card. `personal.location` / `personal.email` are reused, so I write them only once |
+
+#### 16.2 `src/components/About.jsx` (new)
+
+```js
+import { FiUser, FiZap } from "react-icons/fi";
+import { about, personal } from "@/data/portfolio";
+import FadeIn from "@/components/ui/FadeIn";
+import SectionHeading from "@/components/ui/SectionHeading";
+
+// About section: a quick info card (left) + my story (right).
+export default function About() {
+  return (
+    <section id="about" className="mx-auto max-w-5xl px-6 py-24">
+      <FadeIn>
+        <SectionHeading
+          number="01"
+          title="About Me"
+          subtitle="Who I am and how I work"
+        />
+      </FadeIn>
+
+      <div className="grid gap-12 md:grid-cols-[2fr_3fr]">
+        {/* Left: quick info card */}
+        <FadeIn delay={0.1}>
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p className="mb-4 flex items-center gap-2 font-semibold">
+              <FiUser className="text-cyan-600 dark:text-cyan-400" />
+              Quick info
+            </p>
+            {/* <dl> = description list: pairs of a term (dt) and its value (dd) */}
+            <dl className="space-y-4">
+              {about.facts.map((fact) => (
+                <div key={fact.label}>
+                  <dt className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
+                    {fact.label}
+                  </dt>
+                  <dd className="mt-1 font-medium break-words">{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            {/* Green "open to work" line, same text as the Hero badge */}
+            {personal.availability && (
+              <p className="mt-6 flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                {personal.availability}
+              </p>
+            )}
+          </div>
+        </FadeIn>
+
+        {/* Right: my story */}
+        <div>
+          {about.paragraphs.map((paragraph, index) => (
+            <FadeIn key={paragraph} delay={0.1 * (index + 1)}>
+              <p className="mb-4 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                {paragraph}
+              </p>
+            </FadeIn>
+          ))}
+
+          <FadeIn delay={0.4}>
+            <blockquote className="mt-6 border-l-4 border-cyan-600 pl-4 text-slate-700 italic dark:border-cyan-400 dark:text-slate-300">
+              &ldquo;{about.motto}&rdquo;
+            </blockquote>
+          </FadeIn>
+
+          <FadeIn delay={0.5}>
+            <p className="mt-8 mb-3 flex items-center gap-2 font-semibold">
+              <FiZap className="text-cyan-600 dark:text-cyan-400" />
+              Currently learning
+            </p>
+            <ul className="flex flex-wrap gap-2">
+              {about.learning.map((topic) => (
+                <li
+                  key={topic}
+                  className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  {topic}
+                </li>
+              ))}
+            </ul>
+          </FadeIn>
+        </div>
+      </div>
+    </section>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `md:grid-cols-[2fr_3fr]` | **CSS Grid** with 2 columns from 768px: left = 2 parts, right = 3 parts. On phones: 1 column (stacked) |
+| `<dl>`, `<dt>`, `<dd>` | **Description list**: the right HTML for label → value pairs (better for screen readers and SEO than plain `<div>`s) |
+| `about.paragraphs.map((paragraph, index) => ...)` | `.map()` also gives the **index** (0, 1, 2) → I use it for the delay: `0.1 * (index + 1)` = 0.1s, 0.2s, 0.3s |
+| `key={paragraph}` | The text itself is unique, so it works as the key |
+| `<blockquote>` | The right HTML tag for a quote |
+| `&ldquo;` / `&rdquo;` | Curly quote marks “ ” (HTML entities) |
+| `break-words` | Long text (my email) wraps instead of going off the card on small phones |
+| `uppercase tracking-wider text-xs` | Small, spaced-out capital labels (EDUCATION, LOCATION...) |
+| `bg-slate-50 dark:bg-slate-900` | The card is slightly different from the page background in both modes |
+
+#### 16.3 `src/app/page.js`
+
+The test section from Step 12 is replaced by `<About />`:
+
+```js
+import Navbar from "@/components/Navbar";
+import Hero from "@/components/Hero";
+import About from "@/components/About";
+
+// The home page: puts all sections in order.
+export default function Home() {
+  return (
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+        <About />
+      </main>
+    </>
+  );
+}
+```
+
+#### 16.4 Check (my part) ⬜
+
+1. **Read every sentence.** Is it true? Would I say it in an interview? Change anything in `src/data/portfolio.js` → `about`
+   - "CSE graduate" ✔? "500+ LeetCode problems" ✔? "looking for my first developer role" ✔?
+2. `npm run dev` → click **About** in the Navbar → it scrolls to the section, and the parts fade in one by one
+3. Phone view (`F12` → `Ctrl + Shift + M`): the card is on top, the email doesn't go off the screen
+4. Light and dark mode both look good
+
+#### 16.5 Save and push
+
+```powershell
+git status
+git add .
+git commit -m "Add About section"
 git push
 ```
 
