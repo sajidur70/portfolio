@@ -33,7 +33,7 @@
 | | 20 | Footer | ✅ |
 | **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
 | | 22 | SEO: favicon ✅, social preview image ✅ | ✅ |
-| | 23 | README for recruiters | ⬜ |
+| | 23 | README for recruiters | ✅ |
 | | 24 | Lighthouse + final checks → share my link | ⬜ |
 
 **Things I need to prepare (Claude tells me when):** LinkedIn URL ✅ · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key ✅ (in `.env.local` + Vercel)
@@ -3092,6 +3092,39 @@ export default async function OpengraphImage() {
 1. Send my link to myself on **WhatsApp** (or paste it in a LinkedIn post draft, don't publish) → the card appears
 2. Or test it at https://www.opengraph.xyz → paste my link
 3. LinkedIn caches previews. If LinkedIn shows an old preview, use https://www.linkedin.com/post-inspector/ → paste my link → **Inspect** (it refreshes the cache)
+
+---
+
+### Step 23: README for recruiters ✅
+
+**Why:** Recruiters and interviewers open my GitHub repo. The default README said *"This is a Next.js project bootstrapped with create-next-app"*, which tells them nothing about me or my work.
+
+> ✅ **15 Oct: Claude wrote `README.md`** (I asked for "item 3"). Committed and pushed. I can read it at https://github.com/sajidur70/portfolio
+> ⬜ **My part:** read it once. I should be able to explain every feature listed there.
+
+**What's in it:**
+
+| Section | Content |
+|---|---|
+| Title + live link | "Sajidur Rahman, Developer Portfolio" + link to my site |
+| Preview image | The social preview card (`docs/images/social-preview.png`) |
+| About | Who I am + the main idea: **all content in one data file** |
+| Features | Light/dark mode, responsive, Motion animations (pop-in logos, 3D titles, tilt), reduced motion, contact form, data-driven projects, SEO, optimized images, optional 3D |
+| Tech Stack | Table: Next.js 16, React 19, Tailwind v4, Motion, next-themes, react-icons, Web3Forms, Spline, Vercel, ESLint/Prettier |
+| Project Structure | Folder tree with a comment for every file |
+| Getting Started | `git clone` → `npm install` → `.env.local` → `npm run dev` |
+| Environment variables | `NEXT_PUBLIC_WEB3FORMS_KEY` (+ what happens without it, + Vercel) |
+| Scripts | `dev`, `build`, `start`, `lint` |
+| Updating the Content | Where to change bio, skills, projects, resume |
+| Documentation | Links to `STEPS.md`, `PROJECT_GUIDE.md`, `PLAN.md` |
+| Contact | Email, LinkedIn, GitHub |
+
+**Good README habits (for my MERN projects too):**
+1. **Live link + screenshot at the top.** Recruiters spend about 30 seconds
+2. **Features** as short bullet points: what it does, not how
+3. **Tech stack** in a table
+4. **How to run it locally**, including **environment variables** (names only, never real secrets!)
+5. **Project structure**, so a reader knows where things are
 
 ---
 
