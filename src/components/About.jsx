@@ -30,7 +30,7 @@ export default function About() {
                   <dt className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-slate-400">
                     {fact.label}
                   </dt>
-                  <dd className="mt-1 font-medium break-words">
+                  <dd className="mt-1 font-medium wrap-break-word">
                     {/* A link if the fact has an href (email, phone), else plain text */}
                     {fact.href ? (
                       <a

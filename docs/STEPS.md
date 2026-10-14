@@ -29,14 +29,14 @@
 | | 16 | About (quick info card + my story) | ✅ |
 | | 17 | Skills (cards with icons) + **logo pop-in animation** + **3D title animation** (requested 15 Oct) | ✅ |
 | | 18 | Projects + ProjectCard ("Currently building" for now) | ✅ |
-| | 19 | Contact form (Web3Forms) | ⬜ |
+| | 19 | Contact form (Web3Forms) | 🔄 |
 | | 20 | Footer | ⬜ |
 | **4. Polish and launch** | 21 | Mobile check + reduced motion | ⬜ |
 | | 22 | SEO: favicon, social preview image | ⬜ |
 | | 23 | README for recruiters | ⬜ |
 | | 24 | Lighthouse + final checks → share my link | ⬜ |
 
-**Things I need to prepare (Claude tells me when):** LinkedIn URL ✅ · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key (Step 19)
+**Things I need to prepare (Claude tells me when):** LinkedIn URL ✅ · Spline account + scene (Step 15) · profile photo ✅ (`public/profile.png`) · Web3Forms key ✅ (in `.env.local` + Vercel)
 
 **Requested for Step 17 – Skills (15 Oct):**
 - **Skill logos animate when they appear:** each logo pops in one after another (grows from small + fades in + a little spin) when I scroll to it. On hover, a logo lifts and bounces.
@@ -2421,6 +2421,331 @@ Added `import Projects from "@/components/Projects";` and `<Projects />` after `
 2. In `src/data/portfolio.js`: copy the example from the comment above `projects`, paste it **inside** `projects = [ ... ]`, fill it in
 3. Remove that project from `upcomingProjects`
 4. `npm run dev` → check → `git add .` → `git commit -m "Add Task Manager project"` → `git push`
+
+---
+
+### Step 19: Contact section + form (Web3Forms) 🔄
+
+**Why:** Recruiters can message me **without leaving my site**. The message arrives in my Gmail. Web3Forms does the sending, so I don't need my own backend.
+
+> ✅ **15 Oct: Claude built Step 19** (I asked). I signed up at Web3Forms (it needs a free account now) and gave Claude my access key.
+> ESLint ✅, build ✅, the form renders ✅, the key is read from `.env.local` ✅, `.env.local` is NOT committed ✅. Committed locally.
+> ⬜ **My part:** 19.4 test locally (send myself a message) · 19.5 add the key in **Vercel** · then Claude pushes.
+
+**What it has:**
+- **Left:** "Let's work together" text, **Email** + **Phone** (clickable) + **Location**, social icons
+- **Right:** form with **Name**, **Email**, **Message** + **Send Message** button
+- **States:** button shows "Sending..." and is disabled while sending → ✅ "Thank you! Your message was sent." or ❌ "Something went wrong..."
+- **Spam protection:** a hidden `botcheck` checkbox. People don't see it, bots fill it in, Web3Forms rejects them
+- **No key?** The form is replaced by "Please email me at ..." (so the site never shows a broken form)
+
+#### 19.1 The key in `.env.local` (project root, next to `package.json`)
+
+```
+NEXT_PUBLIC_WEB3FORMS_KEY=my-access-key
+```
+
+| Thing | Meaning |
+|---|---|
+| `.env.local` | A file for **settings and secrets** on my computer. `.gitignore` has `.env*`, so it's **never pushed** to GitHub |
+| `NEXT_PUBLIC_` | Next.js only lets variables that start with `NEXT_PUBLIC_` into **browser** code. The form runs in the browser, so it needs this prefix |
+| `process.env.NEXT_PUBLIC_WEB3FORMS_KEY` | How the code reads the value |
+| Is the key secret? | Not really: Web3Forms keys are **public by design** (they only say "send to this email"). Keeping it in `.env.local` is still the professional habit |
+| After changing `.env.local` | **Restart** `npm run dev` (Ctrl + C, then run it again). Next.js reads it only at start |
+
+#### 19.2 `src/components/ContactForm.jsx` (new, Client Component)
+
+```js
+"use client";
+
+import { useState } from "react";
+import { FiAlertCircle, FiCheckCircle, FiSend } from "react-icons/fi";
+import { personal } from "@/data/portfolio";
+
+// The key comes from .env.local (on my computer) or from Vercel's settings (live site).
+// NEXT_PUBLIC_ = Next.js may use it in browser code. It is safe: Web3Forms keys are public.
+const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY;
+
+// Same style for all inputs
+const inputStyle =
+  "w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-cyan-600 focus:ring-2 focus:ring-cyan-600/20 dark:border-slate-700 dark:bg-slate-800 dark:focus:border-cyan-400 dark:focus:ring-cyan-400/20";
+
+// Contact form: sends the message to my Gmail with Web3Forms (no backend needed).
+export default function ContactForm() {
+  // "idle" | "sending" | "success" | "error"
+  const [status, setStatus] = useState("idle");
+
+  async function handleSubmit(event) {
+    event.preventDefault(); // stop the browser from reloading the page
+    const form = event.currentTarget; // save the form now (before "await")
+    setStatus("sending");
+
+    // FormData reads all inputs that have a "name"
+    const formData = new FormData(form);
+    formData.append("access_key", ACCESS_KEY);
+    formData.append("subject", "New message from your portfolio");
+    formData.append("from_name", "Portfolio contact form");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setStatus("success");
+        form.reset(); // clear the inputs
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      // No internet, or the service is down
+      setStatus("error");
+    }
+  }
+
+  // No key set → don't show a form that can't work
+  if (!ACCESS_KEY) {
+    return (
+      <p className="rounded-2xl border border-dashed border-slate-300 p-6 text-slate-600 dark:border-slate-700 dark:text-slate-400">
+        The contact form is not set up yet. Please email me at{" "}
+        <a
+          href={`mailto:${personal.email}`}
+          className="font-medium text-cyan-600 dark:text-cyan-400"
+        >
+          {personal.email}
+        </a>
+        .
+      </p>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-5 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+    >
+      {/* Spam trap: hidden from people. Bots fill it in, and Web3Forms rejects them */}
+      <input
+        type="checkbox"
+        name="botcheck"
+        className="hidden"
+        tabIndex={-1}
+        autoComplete="off"
+      />
+
+      <div>
+        <label htmlFor="name" className="mb-2 block text-sm font-medium">
+          Name
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          maxLength={100}
+          autoComplete="name"
+          placeholder="Your name"
+          className={inputStyle}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="email" className="mb-2 block text-sm font-medium">
+          Email
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          maxLength={150}
+          autoComplete="email"
+          placeholder="you@company.com"
+          className={inputStyle}
+        />
+      </div>
+
+      <div>
+        <label htmlFor="message" className="mb-2 block text-sm font-medium">
+          Message
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          required
+          rows={5}
+          maxLength={3000}
+          placeholder="Hi Sajidur, we have a role that fits you..."
+          className={`${inputStyle} resize-y`}
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={status === "sending"}
+        className="flex w-full items-center justify-center gap-2 rounded-full bg-cyan-600 px-6 py-3 font-medium text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-cyan-400 dark:text-slate-950 dark:hover:bg-cyan-300"
+      >
+        <FiSend aria-hidden="true" />
+        {status === "sending" ? "Sending..." : "Send Message"}
+      </button>
+
+      {/* aria-live: screen readers read the result out loud when it appears */}
+      <div aria-live="polite">
+        {status === "success" && (
+          <p className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+            <FiCheckCircle aria-hidden="true" />
+            Thank you! Your message was sent. I&apos;ll reply soon.
+          </p>
+        )}
+        {status === "error" && (
+          <p className="flex items-center gap-2 text-sm font-medium text-red-600 dark:text-red-400">
+            <FiAlertCircle aria-hidden="true" />
+            Something went wrong. Please try again, or email me at{" "}
+            {personal.email}.
+          </p>
+        )}
+      </div>
+    </form>
+  );
+}
+```
+
+| Code | Meaning |
+|---|---|
+| `useState("idle")` | One state with 4 possible values: `"idle"`, `"sending"`, `"success"`, `"error"` |
+| `event.preventDefault()` | A normal form **reloads the page** on submit. This stops that, so I can send with JavaScript |
+| `const form = event.currentTarget;` | Save the form **before** `await`. After `await`, React may have cleared `event.currentTarget` |
+| `new FormData(form)` | Reads every input that has a **`name`** (`name`, `email`, `message`, `botcheck`) |
+| `formData.append("access_key", ...)` | Add extra fields Web3Forms needs |
+| `async` / `await fetch(...)` | Send the data to the Web3Forms API and **wait** for the answer |
+| `await response.json()` | Read the answer as an object: `{ success: true, ... }` |
+| `try { ... } catch { ... }` | If something **throws** (no internet), go to `catch` instead of crashing |
+| `form.reset()` | Clear all inputs after success |
+| `disabled={status === "sending"}` | Can't click twice while sending (no double messages) |
+| `required`, `type="email"`, `maxLength` | **Browser validation**: empty fields or a wrong email format are blocked before sending |
+| `<label htmlFor="email">` + `<input id="email">` | Connects the label to the input: clicking the label focuses the input, screen readers read it |
+| `autoComplete="email"` | The browser can fill it in automatically |
+| `aria-live="polite"` | Screen readers read the success / error message when it appears |
+| `focus:ring-2` | A soft glow around the input I'm typing in |
+
+#### 19.3 `src/components/Contact.jsx` (new) + `page.js`
+
+```js
+import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
+import { personal } from "@/data/portfolio";
+import FadeIn from "@/components/ui/FadeIn";
+import SectionHeading from "@/components/ui/SectionHeading";
+import SocialLinks from "@/components/ui/SocialLinks";
+import ContactForm from "@/components/ContactForm";
+
+// Contact section: how to reach me (left) + the contact form (right).
+export default function Contact() {
+  // Contact details. Items with an empty value are hidden.
+  const details = [
+    {
+      icon: FiMail,
+      label: "Email",
+      value: personal.email,
+      href: `mailto:${personal.email}`,
+    },
+    {
+      icon: FiPhone,
+      label: "Phone",
+      value: personal.phone,
+      href: `tel:${personal.phone.replace(/[\s-]/g, "")}`,
+    },
+    { icon: FiMapPin, label: "Location", value: personal.location },
+  ].filter((item) => item.value);
+
+  return (
+    <section id="contact" className="mx-auto max-w-5xl px-6 py-24">
+      <FadeIn>
+        <SectionHeading
+          number="04"
+          title="Contact"
+          subtitle="Have a role or a project in mind? Let's talk."
+        />
+      </FadeIn>
+
+      <div className="grid gap-12 md:grid-cols-2">
+        {/* Left: text + contact details + socials */}
+        <FadeIn delay={0.1}>
+          <h3 className="text-2xl font-bold">Let&apos;s work together</h3>
+          <p className="mt-3 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+            I&apos;m{" "}
+            {(
+              personal.availability || "Open to new opportunities"
+            ).toLowerCase()}{" "}
+            and happy to talk about full-stack and MERN work. Send me a message
+            and I&apos;ll reply within 24 hours.
+          </p>
+
+          <ul className="mt-8 space-y-4">
+            {details.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.label} className="flex items-center gap-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-600/10 text-cyan-600 dark:bg-cyan-400/10 dark:text-cyan-400">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      {item.label}
+                    </p>
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        className="font-medium wrap-break-word transition-colors hover:text-cyan-600 dark:hover:text-cyan-400"
+                      >
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="font-medium">{item.value}</p>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          <SocialLinks className="mt-8" />
+        </FadeIn>
+
+        {/* Right: the form */}
+        <FadeIn delay={0.2}>
+          <ContactForm />
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+```
+
+`page.js`: added `import Contact from "@/components/Contact";` and `<Contact />` after `<Projects />`.
+
+#### 19.4 Test on my computer ⬜
+
+1. **Restart** the dev server: `Ctrl + C` → `npm run dev` (so it reads `.env.local`)
+2. http://localhost:3000 → **Contact** → fill in the form → **Send Message**
+3. I see ✅ "Thank you! Your message was sent."
+4. Check **Gmail** (also **Spam**): an email "New message from your portfolio" arrives
+
+#### 19.5 Add the key in Vercel ⬜
+
+`.env.local` is not on GitHub, so **Vercel doesn't have the key**. Without it, the live site shows "Please email me at..." instead of the form.
+
+1. https://vercel.com → my **portfolio** project → **Settings** → **Environment Variables**
+2. **Key:** `NEXT_PUBLIC_WEB3FORMS_KEY`
+3. **Value:** my access key
+4. Environments: keep **Production**, **Preview** and **Development** checked → **Save**
+5. Tell Claude → Claude pushes → Vercel builds **with** the key
+   (If the site was already deployed before adding the key: **Deployments** → latest → **⋯** → **Redeploy**)
+
+#### 19.6 Check the live site
+
+https://sajidur-rahman.vercel.app → **Contact** → send a test message → it arrives in Gmail ✅
 
 ---
 
